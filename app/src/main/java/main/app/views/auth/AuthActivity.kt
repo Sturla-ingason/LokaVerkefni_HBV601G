@@ -3,22 +3,40 @@ package main.app.views.auth
 import android.os.Bundle
 import main.app.R
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
+import com.google.android.material.bottomnavigation.BottomNavigationView
 
 
 class AuthActivity : AppCompatActivity(){
 
-    /**
-     * Creates the fragment container so we can have fragments inn them
-     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        if (savedInstanceState == null) {
-            supportFragmentManager.beginTransaction()
-                .add(R.id.fragment_container, LoginFragment())
-                .commit()
+        val bottomNavigationView: BottomNavigationView = findViewById(R.id.bottomNavigationView)
+
+        val homePageFragment = HomePage()
+        val searchFragment = SearchFragment()
+        val profileFragment = ProfileFragment()
+
+        setCurrentFragment(homePageFragment)
+
+        bottomNavigationView.setOnNavigationItemSelectedListener {
+            when (it.itemId) {
+                R.id.home -> setCurrentFragment(homePageFragment)
+                R.id.profile -> setCurrentFragment(profileFragment)
+                R.id.search -> setCurrentFragment(searchFragment)
+
+            }
+            true
         }
+
     }
+
+    private fun setCurrentFragment(fragment: Fragment) =
+        supportFragmentManager.beginTransaction().apply {
+            replace(R.id.flFragment, fragment)
+            commit()
+        }
 
 }
