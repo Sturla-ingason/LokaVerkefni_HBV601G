@@ -7,11 +7,14 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import main.app.R
 import main.app.databinding.FragmentLoginnBinding
+import main.app.serviceModel.AuthModel
 
 class LoginFragment : Fragment() {
 
     private var _binding: FragmentLoginnBinding? = null
     private val binding get() = _binding!!
+
+    private val authModel = AuthModel()
 
 
     /**
@@ -41,6 +44,14 @@ class LoginFragment : Fragment() {
                 .replace(R.id.fragment_container, CreateAccountFragment())
                 .addToBackStack(null)
                 .commit()
+        }
+
+        binding.LogInnButton.setOnClickListener {
+            val email = binding.EmailInput.text.toString()
+            val password = binding.passwordInput.text.toString()
+
+            authModel.logInn(email, password)
+
         }
 
     }

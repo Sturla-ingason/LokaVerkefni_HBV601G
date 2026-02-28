@@ -40,6 +40,15 @@ class CreateAccountFragment : Fragment(){
                 .commit()
         }
 
+        binding.createAccountButton.setOnClickListener{
+            val email = binding.EmailInput.text.toString()
+            val password = binding.passwordInput.text.toString()
+            val username = binding.usernameInput.text.toString()
+
+
+
+        }
+
     }
 
 

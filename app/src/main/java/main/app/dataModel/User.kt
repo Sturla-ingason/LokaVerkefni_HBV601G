@@ -1,4 +1,6 @@
 package main.app.dataModel
 
-class test {
+class User {
+
+
 }
