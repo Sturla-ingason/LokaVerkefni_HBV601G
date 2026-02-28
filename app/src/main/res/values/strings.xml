@@ -1,6 +1,14 @@
 <resources>
     <string name="app_name">My Application</string>
+
     <string name="create_account_button">Create Account</string>
+    <string name="logInnButton">Log Inn</string>
+
+    <string name="dont_have_account">"Don't have a account?"</string>
+    <string name="allready_have_account">"Already have a account?"</string>
+
     <string name="email">Email</string>
     <string name="password">Password</string>
+    <string name="username_input">Username</string>
+
 </resources>

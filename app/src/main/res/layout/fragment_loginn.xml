@@ -22,7 +22,7 @@
             android:id="@+id/Email_input"
 
             android:gravity="center"
-            android:text="@string/email"
+            android:hint="@string/email"
 
             android:background="@drawable/round_edit_text_background"
             android:padding="10dp"
@@ -35,7 +35,7 @@
             android:id="@+id/password_input"
 
             android:gravity="center"
-            android:text="@string/password"
+            android:hint="@string/password"
 
             android:background="@drawable/round_edit_text_background"
             android:padding="10dp"
@@ -47,14 +47,28 @@
 
 
         <Button
-            android:id="@+id/create_account_button"
+            android:id="@+id/LogInnButton"
 
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="30dp"
-            android:layout_marginVertical="15dp"
+            android:layout_marginTop="15dp"
 
-            android:text="@string/create_account_button"/>
+            android:background="@drawable/loginn_and_create_account_background"
+
+            android:text="@string/logInnButton"/>
+
+        <Button
+            android:id="@+id/dont_have_account_button"
+
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="100dp"
+
+            app:backgroundTint="@color/clear"
+            android:textColor="@color/black"
+
+            android:text="@string/dont_have_account"/>
 
     </LinearLayout>
 
