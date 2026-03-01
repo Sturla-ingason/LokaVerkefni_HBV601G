@@ -18,6 +18,7 @@ class AuthActivity : AppCompatActivity(){
         val homePageFragment = HomePage()
         val searchFragment = SearchFragment()
         val profileFragment = ProfileFragment()
+        val createPostFragment = CreatePostFragment()
 
         setCurrentFragment(homePageFragment)
 
@@ -26,7 +27,7 @@ class AuthActivity : AppCompatActivity(){
                 R.id.home -> setCurrentFragment(homePageFragment)
                 R.id.profile -> setCurrentFragment(profileFragment)
                 R.id.search -> setCurrentFragment(searchFragment)
-
+                R.id.create -> setCurrentFragment(createPostFragment)
             }
             true
         }
