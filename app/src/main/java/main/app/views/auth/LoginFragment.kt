@@ -1,5 +1,6 @@
 package main.app.views.auth
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -8,6 +9,7 @@ import androidx.fragment.app.Fragment
 import main.app.R
 import main.app.databinding.FragmentLoginnBinding
 import main.app.serviceModel.AuthModel
+import main.app.views.auth.AuthActivity
 
 class LoginFragment : Fragment() {
 
@@ -50,7 +52,10 @@ class LoginFragment : Fragment() {
             val email = binding.EmailInput.text.toString()
             val password = binding.passwordInput.text.toString()
 
-            authModel.logInn(email, password)
+            if(authModel.logInn(email, password)){
+                val intent = Intent(requireContext(), AuthActivity::class.java)
+                startActivity(intent)
+            }
 
         }
 

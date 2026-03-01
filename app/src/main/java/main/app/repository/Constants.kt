@@ -1,6 +1,7 @@
 package main.app.repository
 
 import main.app.dataModel.Post
+import main.app.dataModel.User
 
 object Constants {
     fun getPostData(): ArrayList<Post>{
@@ -28,5 +29,10 @@ object Constants {
         postList.add(post10)
 
         return postList
+    }
+
+    fun getUserCred(): User{
+        val user = User("username", "password")
+        return user
     }
 }

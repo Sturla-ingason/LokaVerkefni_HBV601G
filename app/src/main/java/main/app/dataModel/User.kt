@@ -1,6 +1,6 @@
 package main.app.dataModel
 
-class User {
-
-
-}
+data class User (
+    val email: String,
+    val password: String
+):java.io.Serializable
