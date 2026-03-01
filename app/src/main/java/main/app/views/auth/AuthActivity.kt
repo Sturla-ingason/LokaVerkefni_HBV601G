@@ -20,6 +20,7 @@ class AuthActivity : AppCompatActivity(){
         val profileFragment = ProfileFragment()
         val createPostFragment = CreatePostFragment()
 
+
         setCurrentFragment(homePageFragment)
 
         bottomNavigationView.setOnNavigationItemSelectedListener {
