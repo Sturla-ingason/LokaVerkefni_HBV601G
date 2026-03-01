@@ -5,7 +5,10 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import main.app.R
+import main.app.repository.Constants
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -56,5 +59,17 @@ class HomePage : Fragment() {
                     putString(ARG_PARAM2, param2)
                 }
             }
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        val postlist = Constants.getPostData()
+        val adapter = Adapter(postlist)
+
+        val recyclerView: RecyclerView = view.findViewById(R.id.recycleView)
+        recyclerView.layoutManager = LinearLayoutManager(context)
+
+        recyclerView.adapter = adapter
     }
 }
