@@ -10,11 +10,14 @@ class AuthModel {
 
     fun logInn(email: String, password: String) : Boolean{
 
-        if(email.isEmpty() || password.isEmpty()){
-            return false
-        }else{
+        if(email == "username" && password == "password"){
+            println("user logged in")
             return true
+        } else {
+            println("user not logged in")
+            return false
         }
+
 
     }
 
