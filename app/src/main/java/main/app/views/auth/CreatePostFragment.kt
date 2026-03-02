@@ -64,9 +64,14 @@ class CreatePostFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         val addPhotoButton = view.findViewById<Button>(R.id.addPhotoButton)
+        val postButton = view.findViewById<Button>(R.id.postButton)
 
         addPhotoButton.setOnClickListener {
             showPhotoDialog()
+        }
+
+        postButton.setOnClickListener {
+            goToHomePage()
         }
     }
 
@@ -81,4 +86,11 @@ class CreatePostFragment : Fragment() {
 
         dialog.show()
     }
-}
+
+
+    private fun goToHomePage() {
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.flFragment, HomePage())
+                .commit()
+        }
+    }
