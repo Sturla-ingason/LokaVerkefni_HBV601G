@@ -30,6 +30,11 @@ import main.app.repository.CameraRepository
  */
 class CameraFragment : Fragment() {
 
+    private companion object {
+        const val REQ_KEY = "camera_result"
+        const val BUNDLE_URI = "photo_uri"
+    }
+
     private lateinit var cameraRepo: CameraRepository
     private lateinit var imagePreview: ImageView
     private lateinit var takePhotoButton: Button
@@ -47,6 +52,12 @@ class CameraFragment : Fragment() {
                 imagePreview.setImageURI(uri)
                 imagePreview.visibility = View.VISIBLE
                 postButton.isEnabled = true
+
+                parentFragmentManager.setFragmentResult(
+                    REQ_KEY,
+                    Bundle().apply { putString(BUNDLE_URI, uri.toString()) }
+                )
+                parentFragmentManager.popBackStack()
             }
         } else {
             Toast.makeText(requireContext(), "Camera cancelled", Toast.LENGTH_SHORT).show()

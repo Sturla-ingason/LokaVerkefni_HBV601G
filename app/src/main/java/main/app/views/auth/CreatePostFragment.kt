@@ -1,96 +1,57 @@
 package main.app.views.auth
 
-import android.os.Bundle
-import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import main.app.R
 import android.app.AlertDialog
+import android.net.Uri
+import android.os.Bundle
+import android.view.View
 import android.widget.Button
+import android.widget.ImageView
+import androidx.fragment.app.Fragment
+import main.app.R
+import androidx.core.net.toUri
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
-
-/**
- * A simple [Fragment] subclass.
- * Use the [CreatePostFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
-class CreatePostFragment : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
-        }
-    }
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_create_post, container, false)
-    }
-
+class CreatePostFragment : Fragment(R.layout.fragment_create_post) {
     companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment CreatePostFragment.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            CreatePostFragment().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
-                }
-            }
+        const val REQ_KEY = "camera_result"
+        const val BUNDLE_URI = "photo_uri"
     }
+
+    private var selectedPhotoUri: Uri? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        val photoPreview = view.findViewById<ImageView>(R.id.photoPreview)
         val addPhotoButton = view.findViewById<Button>(R.id.addPhotoButton)
         val postButton = view.findViewById<Button>(R.id.postButton)
 
-        addPhotoButton.setOnClickListener {
-            showPhotoDialog()
+        parentFragmentManager.setFragmentResultListener(REQ_KEY, viewLifecycleOwner) { _, bundle ->
+            val uriString = bundle.getString(BUNDLE_URI) ?: return@setFragmentResultListener
+            val uri = uriString.toUri()
+            selectedPhotoUri = uri
+            photoPreview.setImageURI(uri)
         }
+
+        addPhotoButton.setOnClickListener { showPhotoDialog() }
 
         postButton.setOnClickListener {
-            goToHomePage()
-        }
-    }
-
-    private fun showPhotoDialog() {
-
-        val dialog = AlertDialog.Builder(requireContext())
-            .setTitle("Add Photo")
-            .setPositiveButton("Take Photo", null)
-            .setNegativeButton("Import Photo", null)
-            .setNeutralButton("Cancel", null)
-            .create()
-
-        dialog.show()
-    }
-
-
-    private fun goToHomePage() {
             parentFragmentManager.beginTransaction()
                 .replace(R.id.flFragment, HomePage())
                 .commit()
         }
     }
+
+    private fun showPhotoDialog() {
+        AlertDialog.Builder(requireContext())
+            .setTitle("Add Photo")
+            .setPositiveButton("Take Photo") { _, _ ->
+                parentFragmentManager.beginTransaction()
+                    .replace(R.id.flFragment, CameraFragment())
+                    .addToBackStack(null)
+                    .commit()
+            }
+            .setNegativeButton("Import Photo", null)
+            .setNeutralButton("Cancel", null)
+            .show()
+    }
+}
