@@ -5,12 +5,13 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
-import main.app.MainActivity
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 import main.app.R
 import main.app.databinding.FragmentLoginnBinding
 import main.app.serviceModel.AuthModel
-import main.app.views.auth.AuthActivity
 
 class LoginFragment : Fragment() {
 
@@ -19,30 +20,19 @@ class LoginFragment : Fragment() {
 
     private val authModel = AuthModel()
 
-
-    /**
-     * Creates the view for loginn fragment
-     */
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        saveInstanceBundle: Bundle?
+        savedInstanceState: Bundle?
     ): View {
-
         _binding = FragmentLoginnBinding.inflate(inflater, container, false)
         return binding.root
-
     }
 
-
-    /**
-     * Adds event listeners for the buttons
-     * allows us to switch to another fragment
-     */
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.dontHaveAccountButton.setOnClickListener{
+        binding.dontHaveAccountButton.setOnClickListener {
             parentFragmentManager.beginTransaction()
                 .replace(R.id.fragment_container, CreateAccountFragment())
                 .addToBackStack(null)
@@ -53,22 +43,31 @@ class LoginFragment : Fragment() {
             val email = binding.EmailInput.text.toString()
             val password = binding.passwordInput.text.toString()
 
-            if(authModel.logInn(email, password)){
-                val intent = Intent(requireContext(), AuthActivity::class.java)
-                startActivity(intent)
+            if (email.isBlank() || password.isBlank()) {
+                Toast.makeText(requireContext(), "Please fill in all fields", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
             }
 
-        }
+            // Show loading or disable button
+            binding.LogInnButton.isEnabled = false
 
+            viewLifecycleOwner.lifecycleScope.launch {
+                val success = authModel.logInn(email, password)
+                
+                if (success) {
+                    val intent = Intent(requireContext(), AuthActivity::class.java)
+                    startActivity(intent)
+                    requireActivity().finish()
+                } else {
+                    Toast.makeText(requireContext(), "Login failed. Please check your credentials.", Toast.LENGTH_SHORT).show()
+                    binding.LogInnButton.isEnabled = true
+                }
+            }
+        }
     }
 
-
-    /**
-     * Destroys the fragment for loginn
-     */
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
     }
-
 }
