@@ -9,6 +9,10 @@ import io.ktor.client.plugins.logging.Logging
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 
+/**
+ * creates one public http client
+ * we are using http cookies for sessions and session based login
+ */
 object KtorClient {
     val httpClient = HttpClient(OkHttp) {
         install(Logging) {

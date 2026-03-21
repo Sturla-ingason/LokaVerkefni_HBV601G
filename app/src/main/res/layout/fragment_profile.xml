@@ -28,14 +28,11 @@
 
                 <!-- user name -->
                 <TextView
+                    android:id="@+id/username"
                     android:layout_width="200dp"
                     android:layout_height="20dp"
                     android:gravity="center"
-                    android:text="hvernig er að vera til"/>
-                <TextView
-                    android:layout_width="200dp"
-                    android:layout_height="20dp"
-                    android:text="Hvernig er að vera sovna flottur"/>
+                    android:text=""/>
 
             </LinearLayout>
 
@@ -62,11 +59,12 @@
                         android:text="Following" />
 
                     <TextView
+                        android:id="@+id/followingCount"
                         android:layout_width="match_parent"
                         android:layout_height="40dp"
                         android:gravity="top|center"
 
-                        android:text="50"/>
+                        android:text="0"/>
 
                 </LinearLayout>
 
@@ -85,11 +83,12 @@
                         android:text="Followers" />
 
                     <TextView
+                        android:id="@+id/followersCount"
                         android:layout_width="match_parent"
                         android:layout_height="40dp"
                         android:gravity="top|center"
 
-                        android:text="50"/>
+                        android:text="0"/>
 
                 </LinearLayout>
 
@@ -106,7 +105,7 @@
 
             <!-- posts made by user -->
             <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recycleView"
+                android:id="@+id/recycleViewProfile"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 tools:listitem="@layout/post_view" />

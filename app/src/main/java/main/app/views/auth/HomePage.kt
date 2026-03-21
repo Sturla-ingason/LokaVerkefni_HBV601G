@@ -17,6 +17,11 @@ class HomePage : Fragment() {
     private val postRepository = PostRepository()
     private lateinit var adapter: Adapter
 
+
+
+    /**
+     *
+     */
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -24,6 +29,10 @@ class HomePage : Fragment() {
         return inflater.inflate(R.layout.fragment_home_page, container, false)
     }
 
+
+    /**
+     *
+     */
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -35,6 +44,10 @@ class HomePage : Fragment() {
         fetchPosts()
     }
 
+
+    /**
+     *
+     */
     private fun fetchPosts() {
         viewLifecycleOwner.lifecycleScope.launch {
             try {

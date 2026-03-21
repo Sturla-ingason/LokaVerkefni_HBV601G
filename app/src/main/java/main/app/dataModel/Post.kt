@@ -3,6 +3,9 @@ package main.app.dataModel
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+/**
+ * Post Data object. Stores Post data that comes from the api
+ */
 @Serializable
 data class Post(
     val userId: Int? = null,

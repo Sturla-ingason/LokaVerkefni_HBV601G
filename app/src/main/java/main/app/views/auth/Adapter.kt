@@ -10,15 +10,27 @@ import main.app.dataModel.Post
 
 class Adapter(private var postlist: List<Post>): RecyclerView.Adapter<Adapter.ViewHolder>() {
 
+    /**
+     * Inflates the post_view layout and wraps it in a ViewHolder.
+     * Called by the RecyclerView when it needs a new container for a post item.
+     * @param parent the RecyclerView that this view will be attached to
+     * @param viewType the type of view (unused here, only one type of post view)
+     * @return a new ViewHolder containing the inflated post view
+     */
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val itemView = LayoutInflater.from(parent.context).inflate(R.layout.post_view, parent, false)
         return ViewHolder(itemView)
     }
 
-    override fun getItemCount(): Int {
-        return postlist.size
-    }
 
+
+    /**
+     * Binds post data to the ViewHolder at the given scroll position.
+     * Sets the title and body text views, falling back through
+     * multiple field names if some are null.
+     * @param holder the ViewHolder to populate
+     * @param position the index of the post in the list
+     */
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val currentItem = postlist[position]
         
@@ -35,11 +47,31 @@ class Adapter(private var postlist: List<Post>): RecyclerView.Adapter<Adapter.Vi
             ?: "No content available"
     }
 
+
+
+    /**
+     * Allows us to see how many posts are in the list total
+     * @return postlist size
+     */
+    override fun getItemCount(): Int {
+        return postlist.size
+    }
+
+
+    /**
+     *
+     */
     fun updateData(newPosts: List<Post>) {
         postlist = newPosts
         notifyDataSetChanged()
     }
 
+
+    /**
+     * Holds references to the views within a single post item.
+     * Avoids repeated calls to findViewById when the RecyclerView recycles items.
+     * @param itemView the inflated post_view layout for this item
+     */
     class ViewHolder(itemView: View): RecyclerView.ViewHolder(itemView){
         val title = itemView.findViewById<TextView>(R.id.postTitle)
         val body = itemView.findViewById<TextView>(R.id.postBody)

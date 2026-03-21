@@ -6,6 +6,13 @@ import io.ktor.client.statement.HttpResponse
 import io.ktor.http.isSuccess
 
 class AuthRepository {
+
+    /**
+     * Allows a user to login to their account
+     * @param email the users email
+     * @param password the password of the user
+     * @return true if login was successful, false if otherwise
+     */
     suspend fun login(email: String, password: String): Boolean {
         return try {
             val response: HttpResponse = KtorClient.httpClient.post(HttpRoutes.LOGIN) {
@@ -19,6 +26,11 @@ class AuthRepository {
         }
     }
 
+
+    /**
+     * Allows a user to logout of their account
+     * @return true if logedout successfully, false if otherwise
+     */
     suspend fun logout(): Boolean {
         return try {
             val response: HttpResponse = KtorClient.httpClient.post(HttpRoutes.LOGOUT)

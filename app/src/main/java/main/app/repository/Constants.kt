@@ -3,6 +3,9 @@ package main.app.repository
 import main.app.dataModel.Post
 import main.app.dataModel.User
 
+/**
+ * temp objects for testing
+ */
 object Constants {
     fun getPostData(): ArrayList<Post>{
         val postList = ArrayList<Post>()

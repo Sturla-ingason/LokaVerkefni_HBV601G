@@ -2,6 +2,9 @@ package main.app.repository
 
 import main.app.BuildConfig
 
+/**
+ * determines all the https routs for the api
+ */
 object HttpRoutes {
     private val BASE_URL = BuildConfig.BASE_URL
 
@@ -14,6 +17,8 @@ object HttpRoutes {
     val GET_USER = "$BASE_URL/user/getuser"
     val PROFILE = "$BASE_URL/user/profile"
     val PROFILE_BY_USERNAME = "$BASE_URL/user/profile/by-username"
+    val FOLLOWING_COUNT = "$BASE_URL/user/followingcount"
+    val FOLLOWER_COUNT = "$BASE_URL/user/followercxount"
 
     // Posts
     val CREATE_POST = "$BASE_URL/post/create"
