@@ -8,7 +8,7 @@ import androidx.recyclerview.widget.RecyclerView
 import main.app.R
 import main.app.dataModel.Post
 
-class Adapter(private val postlist: ArrayList<Post>): RecyclerView.Adapter<Adapter.ViewHolder>() {
+class Adapter(private var postlist: List<Post>): RecyclerView.Adapter<Adapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val itemView = LayoutInflater.from(parent.context).inflate(R.layout.post_view, parent, false)
@@ -21,8 +21,23 @@ class Adapter(private val postlist: ArrayList<Post>): RecyclerView.Adapter<Adapt
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val currentItem = postlist[position]
-        holder.title.text = currentItem.title
-        holder.body.text = currentItem.body
+        
+        // Try various common field names for title/username
+        holder.title.text = currentItem.title 
+            ?: currentItem.username 
+            ?: "User #${currentItem.userId ?: currentItem.id ?: "Unknown"}"
+
+        // Try various common field names for post content
+        holder.body.text = currentItem.body 
+            ?: currentItem.postText 
+            ?: currentItem.description 
+            ?: currentItem.content 
+            ?: "No content available"
+    }
+
+    fun updateData(newPosts: List<Post>) {
+        postlist = newPosts
+        notifyDataSetChanged()
     }
 
     class ViewHolder(itemView: View): RecyclerView.ViewHolder(itemView){
