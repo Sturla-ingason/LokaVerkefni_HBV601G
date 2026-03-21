@@ -22,5 +22,7 @@ object HttpRoutes {
 
     // Posts
     val CREATE_POST = "$BASE_URL/post/create"
+    val GET_USERS_POSTS = "$BASE_URL/post/userposts"
     val GET_FEED = "$BASE_URL/feed/getfeed"
+
 }

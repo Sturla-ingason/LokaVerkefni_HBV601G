@@ -64,7 +64,7 @@ class ProfileFragment : Fragment() {
     private fun fetchPosts() {
         viewLifecycleOwner.lifecycleScope.launch {
             try {
-                val posts = postRepository.getPosts()
+                val posts = postRepository.getPostByUser()
                 adapter.updateData(posts)
             } catch (e: Exception) {
                 // Handle error (e.g., show a Toast or an error message in the UI)

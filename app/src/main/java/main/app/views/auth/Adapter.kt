@@ -34,18 +34,25 @@ class Adapter(private var postlist: List<Post>): RecyclerView.Adapter<Adapter.Vi
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val currentItem = postlist[position]
         
-        // Try various common field names for title/username
-        holder.title.text = currentItem.title 
-            ?: currentItem.username 
-            ?: "User #${currentItem.userId ?: currentItem.id ?: "Unknown"}"
-
-        // Try various common field names for post content
-        holder.body.text = currentItem.body 
-            ?: currentItem.postText 
-            ?: currentItem.description 
-            ?: currentItem.content 
-            ?: "No content available"
+        holder.title.text = currentItem.username ?: "User #${currentItem.userId ?: "Unknown"}"
+        holder.body.text = currentItem.description ?: "No content available"
     }
+
+
+    /**
+     *  auka shit sem ég tók út til að prófa
+     *         // Try various common field names for title/username
+     *         holder.title.text = currentItem.title
+     *             ?: currentItem.username
+     *             ?: "User #${currentItem.userId ?: currentItem.id ?: "Unknown"}"
+     *
+     *         // Try various common field names for post content
+     *         holder.body.text = currentItem.body
+     *             ?: currentItem.postText
+     *             ?: currentItem.description
+     *             ?: currentItem.content
+     *             ?: "No content available"
+     */
 
 
 
