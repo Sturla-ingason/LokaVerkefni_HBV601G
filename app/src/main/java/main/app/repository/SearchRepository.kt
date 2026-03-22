@@ -3,6 +3,8 @@ package main.app.repository
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
+import main.app.apiConnections.HttpRoutes
+import main.app.apiConnections.KtorClient
 import main.app.dataModel.Post
 
 class SearchRepository {

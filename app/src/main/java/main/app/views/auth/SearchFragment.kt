@@ -7,13 +7,13 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.launch
 import main.app.R
+import main.app.adapters.Adapter
 import main.app.dataModel.Post
 import main.app.repository.SearchRepository
 
@@ -44,7 +44,7 @@ class SearchFragment : Fragment() {
         searchStatus = view.findViewById(R.id.searchStatus)
         searchRecyclerView = view.findViewById(R.id.searchRecyclerView)
 
-        adapter = Adapter(emptyList())
+        adapter = Adapter(emptyList(), viewLifecycleOwner.lifecycleScope, childFragmentManager)
         searchRecyclerView.layoutManager = LinearLayoutManager(requireContext())
         searchRecyclerView.adapter = adapter
 

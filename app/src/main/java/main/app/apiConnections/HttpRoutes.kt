@@ -29,4 +29,8 @@ object HttpRoutes {
     val GET_COMMENTS = "$BASE_URL/post/comment"
     val CREATE_COMMENT = "$BASE_URL/post/comment/create"
 
+    // Search
+    val USER_SEARCH = "$BASE_URL/usersearch"
+    val HASHTAG_SEARCH = "$BASE_URL/hashtagsearch"
+
 }
