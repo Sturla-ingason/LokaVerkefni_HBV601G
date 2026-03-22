@@ -18,4 +18,8 @@ object HttpRoutes {
     // Posts
     val CREATE_POST = "$BASE_URL/post/create"
     val GET_FEED = "$BASE_URL/feed/getfeed"
+
+    // Search
+    val USER_SEARCH = "$BASE_URL/usersearch"
+    val HASHTAG_SEARCH = "$BASE_URL/hashtagsearch"
 }
