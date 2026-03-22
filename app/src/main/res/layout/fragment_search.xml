@@ -1,14 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
     tools:context=".views.auth.SearchFragment">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <EditText
+        android:id="@+id/searchInput"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="@string/hello_search_fragment" />
+        android:layout_height="wrap_content"
+        android:hint="Search username or #hashtag"
+        android:padding="12dp"
+        android:background="@drawable/round_edit_text_background"
+        android:inputType="text"
+        android:textColor="@color/black"
+        android:layout_marginBottom="12dp" />
 
-</FrameLayout>
+    <Button
+        android:id="@+id/searchButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Search"
+        android:layout_marginBottom="12dp" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/searchRecyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        tools:listitem="@layout/post_view" />
+
+</LinearLayout>
