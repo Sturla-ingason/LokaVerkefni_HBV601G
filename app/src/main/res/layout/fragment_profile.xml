@@ -21,18 +21,23 @@
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_weight="1"
-                android:layout_height="match_parent"
-                android:orientation="vertical">
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center">
 
                 <!-- profile picture -->
+                <ImageView
+                    android:layout_width="64dp"
+                    android:layout_height="64dp"
+                    android:src="@android:drawable/ic_menu_gallery" />
 
-                <!-- user name -->
+                <!-- username -->
                 <TextView
                     android:id="@+id/username"
-                    android:layout_width="200dp"
-                    android:layout_height="20dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:gravity="center"
-                    android:text=""/>
+                    android:text="@string/usernamePlaceholder"/>
 
             </LinearLayout>
 

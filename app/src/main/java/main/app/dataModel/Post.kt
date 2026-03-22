@@ -13,6 +13,7 @@ data class Post(
     val username: String? = null,
     val description: String? = null,
     val likeCount: Int? = null,
+    val likedByCurrentUser: Boolean? = null,
 ): java.io.Serializable
 
 

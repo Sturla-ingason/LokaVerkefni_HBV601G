@@ -36,7 +36,7 @@ class HomePage : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        adapter = Adapter(emptyList())
+        adapter = Adapter(emptyList(), viewLifecycleOwner.lifecycleScope)
         val recyclerView: RecyclerView = view.findViewById(R.id.recycleView)
         recyclerView.layoutManager = LinearLayoutManager(context)
         recyclerView.adapter = adapter

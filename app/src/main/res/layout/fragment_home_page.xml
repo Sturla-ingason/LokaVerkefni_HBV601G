@@ -22,7 +22,7 @@
             android:textSize="20sp"
             android:textColor="@color/black"
             android:textStyle="bold"
-            android:text="Fragment 1"/>
+            android:text="Home Feed"/>
 
         <!--RecyclerView-->
         <androidx.recyclerview.widget.RecyclerView

@@ -3,12 +3,23 @@ package main.app.views.auth
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+
 import main.app.R
 import main.app.dataModel.Post
+import main.app.repository.PostRepository
 
-class Adapter(private var postlist: List<Post>): RecyclerView.Adapter<Adapter.ViewHolder>() {
+class Adapter(
+    private var postlist: List<Post>,
+    private val scope: CoroutineScope
+): RecyclerView.Adapter<Adapter.ViewHolder>() {
+
+    private val postRepository = PostRepository()
 
     /**
      * Inflates the post_view layout and wraps it in a ViewHolder.
@@ -36,6 +47,29 @@ class Adapter(private var postlist: List<Post>): RecyclerView.Adapter<Adapter.Vi
         
         holder.title.text = currentItem.username ?: "User #${currentItem.userId ?: "Unknown"}"
         holder.body.text = currentItem.description ?: "No content available"
+        holder.likeCounter.text = (currentItem.likeCount ?: 0).toString()
+
+        var isLiked = currentItem.likedByCurrentUser ?: false
+        holder.likeButton.text = if (isLiked) "Unlike" else "Like"
+
+
+        /**
+         * Event handler for liking and unlikeing a post
+         */
+        holder.likeButton.setOnClickListener {
+            val postId = currentItem.postID ?: return@setOnClickListener
+            if (isLiked) {
+                isLiked = false
+                holder.likeButton.text = "Like"
+                holder.likeCounter.text = ((holder.likeCounter.text.toString().toIntOrNull() ?: 1) - 1).toString()
+                scope.launch(Dispatchers.IO) { postRepository.unlikePost(postId) }
+            } else {
+                isLiked = true
+                holder.likeButton.text = "Dislike"
+                holder.likeCounter.text = ((holder.likeCounter.text.toString().toIntOrNull() ?: 0) + 1).toString()
+                scope.launch(Dispatchers.IO) { postRepository.likePost(postId) }
+            }
+        }
     }
 
 
@@ -82,6 +116,10 @@ class Adapter(private var postlist: List<Post>): RecyclerView.Adapter<Adapter.Vi
     class ViewHolder(itemView: View): RecyclerView.ViewHolder(itemView){
         val title = itemView.findViewById<TextView>(R.id.postTitle)
         val body = itemView.findViewById<TextView>(R.id.postBody)
+
+        val likeButton = itemView.findViewById<Button>(R.id.likeButton)
+
+        val likeCounter = itemView.findViewById<TextView>(R.id.likeCounter)
     }
 
 }

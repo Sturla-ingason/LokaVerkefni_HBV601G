@@ -26,4 +26,6 @@
     <string name="followingNumber">0</string>
     <string name="followersNumber">0</string>
 
+    <string name="usernamePlaceholder">username</string>
+
 </resources>
