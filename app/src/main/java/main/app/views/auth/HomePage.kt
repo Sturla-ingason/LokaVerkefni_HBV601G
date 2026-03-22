@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.launch
 import main.app.R
+import main.app.adapters.Adapter
 import main.app.repository.PostRepository
 
 class HomePage : Fragment() {
@@ -17,6 +18,11 @@ class HomePage : Fragment() {
     private val postRepository = PostRepository()
     private lateinit var adapter: Adapter
 
+
+
+    /**
+     *
+     */
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -24,10 +30,14 @@ class HomePage : Fragment() {
         return inflater.inflate(R.layout.fragment_home_page, container, false)
     }
 
+
+    /**
+     *
+     */
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        adapter = Adapter(emptyList())
+        adapter = Adapter(emptyList(), viewLifecycleOwner.lifecycleScope, childFragmentManager)
         val recyclerView: RecyclerView = view.findViewById(R.id.recycleView)
         recyclerView.layoutManager = LinearLayoutManager(context)
         recyclerView.adapter = adapter
@@ -35,6 +45,10 @@ class HomePage : Fragment() {
         fetchPosts()
     }
 
+
+    /**
+     *
+     */
     private fun fetchPosts() {
         viewLifecycleOwner.lifecycleScope.launch {
             try {
