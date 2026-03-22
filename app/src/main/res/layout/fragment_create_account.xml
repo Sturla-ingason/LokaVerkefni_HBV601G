@@ -30,7 +30,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="30dp"
-            android:layout_marginVertical="15dp"/>
+            android:layout_marginVertical="15dp"
+            android:inputType="textPersonName"/>
 
         <EditText
             android:id="@+id/Email_input"
@@ -43,21 +44,27 @@
 
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="30dp" />
+            android:layout_marginHorizontal="30dp"
+            android:inputType="textEmailAddress"/>
 
-        <EditText
-            android:id="@+id/password_input"
-
-            android:gravity="center"
-            android:hint="@string/password"
-
-            android:background="@drawable/round_edit_text_background"
-            android:padding="10dp"
-
+        <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="30dp"
-            android:layout_marginVertical="15dp"/>
+            android:layout_marginVertical="15dp"
+            app:passwordToggleEnabled="true"
+            app:hintEnabled="false">
+
+            <EditText
+                android:id="@+id/password_input"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/round_edit_text_background"
+                android:gravity="center"
+                android:hint="@string/password"
+                android:inputType="textPassword"
+                android:padding="10dp" />
+        </com.google.android.material.textfield.TextInputLayout>
 
 
         <Button

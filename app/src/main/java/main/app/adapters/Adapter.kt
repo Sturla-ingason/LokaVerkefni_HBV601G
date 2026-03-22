@@ -14,6 +14,7 @@ import main.app.R
 import main.app.dataModel.Post
 import main.app.repository.PostRepository
 import main.app.views.auth.CommentFragment
+import main.app.views.auth.PostDetailFragment
 
 class Adapter(
     private var postlist: List<Post>,
@@ -23,27 +24,11 @@ class Adapter(
 
     private val postRepository = PostRepository()
 
-    /**
-     * Inflates the post_view layout and wraps it in a ViewHolder.
-     * Called by the RecyclerView when it needs a new container for a post item.
-     * @param parent the RecyclerView that this view will be attached to
-     * @param viewType the type of view (unused here, only one type of post view)
-     * @return a new ViewHolder containing the inflated post view
-     */
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val itemView = LayoutInflater.from(parent.context).inflate(R.layout.post_view, parent, false)
         return ViewHolder(itemView)
     }
 
-
-
-    /**
-     * Binds post data to the ViewHolder at the given scroll position.
-     * Sets the title and body text views, falling back through
-     * multiple field names if some are null.
-     * @param holder the ViewHolder to populate
-     * @param position the index of the post in the list
-     */
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val currentItem = postlist[position]
 
@@ -54,10 +39,12 @@ class Adapter(
         var isLiked = currentItem.likedByCurrentUser ?: false
         holder.likeButton.text = if (isLiked) "Unlike" else "Like"
 
+        // Open Post Detail on Item Click
+        holder.itemView.setOnClickListener {
+            val detailFragment = PostDetailFragment.newInstance(currentItem)
+            detailFragment.show(fragmentManager, "PostDetailFragment")
+        }
 
-        /**
-         * Event handler for liking and unlikeing a post
-         */
         holder.likeButton.setOnClickListener {
             val postId = currentItem.postID ?: return@setOnClickListener
             if (isLiked) {
@@ -67,16 +54,12 @@ class Adapter(
                 scope.launch(Dispatchers.IO) { postRepository.unlikePost(postId) }
             } else {
                 isLiked = true
-                holder.likeButton.text = "Dislike"
+                holder.likeButton.text = "Unlike"
                 holder.likeCounter.text = ((holder.likeCounter.text.toString().toIntOrNull() ?: 0) + 1).toString()
                 scope.launch(Dispatchers.IO) { postRepository.likePost(postId) }
             }
         }
 
-
-        /**
-         * event handler for comment button
-         */
         holder.commentButton.setOnClickListener {
             val postId = currentItem.postID ?: return@setOnClickListener
             val dialog = CommentFragment.newInstance(postId, currentItem.comments ?: emptyList())
@@ -84,56 +67,20 @@ class Adapter(
         }
     }
 
-
-    /**
-     *  auka shit sem ég tók út til að prófa
-     *         // Try various common field names for title/username
-     *         holder.title.text = currentItem.title
-     *             ?: currentItem.username
-     *             ?: "User #${currentItem.userId ?: currentItem.id ?: "Unknown"}"
-     *
-     *         // Try various common field names for post content
-     *         holder.body.text = currentItem.body
-     *             ?: currentItem.postText
-     *             ?: currentItem.description
-     *             ?: currentItem.content
-     *             ?: "No content available"
-     */
-
-
-
-    /**
-     * Allows us to see how many posts are in the list total
-     * @return postlist size
-     */
     override fun getItemCount(): Int {
         return postlist.size
     }
 
-
-    /**
-     *
-     */
     fun updateData(newPosts: List<Post>) {
         postlist = newPosts
         notifyDataSetChanged()
     }
 
-
-    /**
-     * Holds references to the views within a single post item.
-     * Avoids repeated calls to findViewById when the RecyclerView recycles items.
-     * @param itemView the inflated post_view layout for this item
-     */
     class ViewHolder(itemView: View): RecyclerView.ViewHolder(itemView){
         val title = itemView.findViewById<TextView>(R.id.postTitle)
         val body = itemView.findViewById<TextView>(R.id.postBody)
-
         val likeButton = itemView.findViewById<Button>(R.id.likeButton)
-
         val likeCounter = itemView.findViewById<TextView>(R.id.likeCounter)
-
         val commentButton = itemView.findViewById<Button>(R.id.commentButton)
     }
-
 }
