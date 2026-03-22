@@ -4,15 +4,20 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 import main.app.R
 import main.app.databinding.FragmentCreateAccountBinding
+import main.app.repository.AuthRepository
 import main.app.views.auth.LoginFragment
 
 class CreateAccountFragment : Fragment(){
 
     private var _binding: FragmentCreateAccountBinding? = null
     private val binding get() = _binding!!
+    private val authRepository = AuthRepository()
 
 
     /**
@@ -41,12 +46,26 @@ class CreateAccountFragment : Fragment(){
         }
 
         binding.createAccountButton.setOnClickListener{
-            val email = binding.EmailInput.text.toString()
-            val password = binding.passwordInput.text.toString()
-            val username = binding.usernameInput.text.toString()
+            val email = binding.EmailInput.text.toString().trim()
+            val password = binding.passwordInput.text.toString().trim()
+            val username = binding.usernameInput.text.toString().trim()
 
+            if (email.isEmpty() || password.isEmpty() || username.isEmpty()) {
+                Toast.makeText(requireContext(), "Please fill in all fields", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
 
-
+            viewLifecycleOwner.lifecycleScope.launch {
+                val success = authRepository.signup(email, username, password)
+                if (success) {
+                    Toast.makeText(requireContext(), "Account created successfully!", Toast.LENGTH_SHORT).show()
+                    parentFragmentManager.beginTransaction()
+                        .replace(R.id.fragment_container, LoginFragment())
+                        .commit()
+                } else {
+                    Toast.makeText(requireContext(), "Signup failed. Please try again.", Toast.LENGTH_SHORT).show()
+                }
+            }
         }
 
     }

@@ -41,4 +41,25 @@ class AuthRepository {
             false
         }
     }
+
+    /**
+     * Allows a user to signup for a new account
+     * @param email the users email
+     * @param username the users username
+     * @param password the users password
+     * @return true if signup was successful, false if otherwise
+     */
+    suspend fun signup(email: String, username: String, password: String): Boolean {
+        return try {
+            val response: HttpResponse = KtorClient.httpClient.post(HttpRoutes.SIGNUP) {
+                parameter("email", email)
+                parameter("username", username)
+                parameter("password", password)
+            }
+            response.status.isSuccess()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
+        }
+    }
 }
