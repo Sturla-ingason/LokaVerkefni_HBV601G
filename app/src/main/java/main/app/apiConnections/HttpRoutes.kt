@@ -19,6 +19,8 @@ object HttpRoutes {
     val PROFILE_BY_USERNAME = "$BASE_URL/user/profile/by-username"
     val FOLLOWING_COUNT = "$BASE_URL/user/followingcount"
     val FOLLOWER_COUNT = "$BASE_URL/user/followercxount"
+    val UPDATE_USER = "$BASE_URL/user/update"
+    val DELETE_USER = "$BASE_URL/user/delete"
 
     // Posts
     val CREATE_POST = "$BASE_URL/post/create"
