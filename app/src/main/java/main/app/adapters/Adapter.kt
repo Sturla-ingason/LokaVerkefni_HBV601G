@@ -1,22 +1,24 @@
-package main.app.views.auth
+package main.app.adapters
 
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
+import androidx.fragment.app.FragmentManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-
 import main.app.R
 import main.app.dataModel.Post
 import main.app.repository.PostRepository
+import main.app.views.auth.CommentFragment
 
 class Adapter(
     private var postlist: List<Post>,
-    private val scope: CoroutineScope
+    private val scope: CoroutineScope,
+    private val fragmentManager: FragmentManager
 ): RecyclerView.Adapter<Adapter.ViewHolder>() {
 
     private val postRepository = PostRepository()
@@ -44,7 +46,7 @@ class Adapter(
      */
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val currentItem = postlist[position]
-        
+
         holder.title.text = currentItem.username ?: "User #${currentItem.userId ?: "Unknown"}"
         holder.body.text = currentItem.description ?: "No content available"
         holder.likeCounter.text = (currentItem.likeCount ?: 0).toString()
@@ -69,6 +71,16 @@ class Adapter(
                 holder.likeCounter.text = ((holder.likeCounter.text.toString().toIntOrNull() ?: 0) + 1).toString()
                 scope.launch(Dispatchers.IO) { postRepository.likePost(postId) }
             }
+        }
+
+
+        /**
+         * event handler for comment button
+         */
+        holder.commentButton.setOnClickListener {
+            val postId = currentItem.postID ?: return@setOnClickListener
+            val dialog = CommentFragment.newInstance(postId, currentItem.comments ?: emptyList())
+            dialog.show(fragmentManager, "CommentFragment")
         }
     }
 
@@ -120,6 +132,8 @@ class Adapter(
         val likeButton = itemView.findViewById<Button>(R.id.likeButton)
 
         val likeCounter = itemView.findViewById<TextView>(R.id.likeCounter)
+
+        val commentButton = itemView.findViewById<Button>(R.id.commentButton)
     }
 
 }

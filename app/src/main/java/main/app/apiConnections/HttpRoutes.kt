@@ -1,4 +1,4 @@
-package main.app.repository
+package main.app.apiConnections
 
 import main.app.BuildConfig
 
@@ -26,5 +26,7 @@ object HttpRoutes {
     val GET_FEED = "$BASE_URL/feed/getfeed"
     val LIKE_POST = "$BASE_URL/post/like"
     val UNLIKE_POST = "$BASE_URL/post/unlike"
+    val GET_COMMENTS = "$BASE_URL/post/comment"
+    val CREATE_COMMENT = "$BASE_URL/post/comment/create"
 
 }

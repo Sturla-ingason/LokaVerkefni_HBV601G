@@ -1,6 +1,5 @@
 package main.app.dataModel
 
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 /**
@@ -14,6 +13,7 @@ data class Post(
     val description: String? = null,
     val likeCount: Int? = null,
     val likedByCurrentUser: Boolean? = null,
+    val comments: List<Comment>? = null,
 ): java.io.Serializable
 
 

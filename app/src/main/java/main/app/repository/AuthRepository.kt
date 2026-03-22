@@ -4,6 +4,8 @@ import io.ktor.client.request.parameter
 import io.ktor.client.request.post
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.isSuccess
+import main.app.apiConnections.HttpRoutes
+import main.app.apiConnections.KtorClient
 
 class AuthRepository {
 

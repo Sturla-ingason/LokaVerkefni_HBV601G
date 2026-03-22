@@ -28,4 +28,7 @@
 
     <string name="usernamePlaceholder">username</string>
 
+
+    <string name="addComment">Add comment</string>
+
 </resources>

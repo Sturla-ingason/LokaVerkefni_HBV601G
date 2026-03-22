@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recycleView"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            tools:listitem="@layout/comment_view"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <EditText
+                android:id="@+id/commentToAdd"
+                android:layout_width="0dp"
+                android:layout_weight="2"
+                android:layout_height="wrap_content"
+
+                android:background="@drawable/round_edit_text_background"/>
+
+            <Button
+                android:id="@+id/createCommentButton"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="@string/addComment"/>
+
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/commentButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Close"/>
+
+
+
+    </LinearLayout>
+
+
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

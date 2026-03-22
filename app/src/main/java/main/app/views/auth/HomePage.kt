@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.launch
 import main.app.R
+import main.app.adapters.Adapter
 import main.app.repository.PostRepository
 
 class HomePage : Fragment() {
@@ -36,7 +37,7 @@ class HomePage : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        adapter = Adapter(emptyList(), viewLifecycleOwner.lifecycleScope)
+        adapter = Adapter(emptyList(), viewLifecycleOwner.lifecycleScope, childFragmentManager)
         val recyclerView: RecyclerView = view.findViewById(R.id.recycleView)
         recyclerView.layoutManager = LinearLayoutManager(context)
         recyclerView.adapter = adapter

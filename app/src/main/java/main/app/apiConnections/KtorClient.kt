@@ -1,4 +1,4 @@
-package main.app.repository
+package main.app.apiConnections
 
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
