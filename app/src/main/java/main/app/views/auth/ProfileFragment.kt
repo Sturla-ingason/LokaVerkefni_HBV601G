@@ -57,6 +57,14 @@ class ProfileFragment : Fragment() {
         fetchPosts()
         fetchProfileData()
 
+        // Navigate to settings page when gear icon is tapped
+        binding.settingsButton.setOnClickListener {
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.flFragment, SettingsFragment())
+                .addToBackStack(null)
+                .commit()
+        }
+
     }
 
     /**

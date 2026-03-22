@@ -31,4 +31,14 @@
 
     <string name="addComment">Add comment</string>
 
+    <string name="settings_title">Settings</string>
+    <string name="save_settings">Save Changes</string>
+    <string name="back">Back</string>
+    <string name="new_password">New Password</string>
+    <string name="new_password_hint">Leave empty to keep current</string>
+    <string name="bio">Bio</string>
+    <string name="bio_hint">Tell us about yourself</string>
+    <string name="logout">Log Out</string>
+    <string name="delete_account">Delete Account</string>
+
 </resources>
