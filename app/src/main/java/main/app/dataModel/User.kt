@@ -7,9 +7,11 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class User (
+    val userID: Int? = null,
     val username: String? = null,
     val email: String? = null,
     val password: String? = null,
+    val bio: String? = null,
     val following: Int? = null,
     val followers: Int? = null,
 ):java.io.Serializable
