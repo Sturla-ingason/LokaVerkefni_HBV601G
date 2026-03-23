@@ -8,6 +8,7 @@ import io.ktor.client.request.post
 import main.app.apiConnections.HttpRoutes
 import main.app.apiConnections.KtorClient
 import main.app.dataModel.Post
+import main.app.dataModel.User
 
 class PostRepository {
     suspend fun getPosts(): List<Post> {
@@ -27,6 +28,17 @@ class PostRepository {
     suspend fun unlikePost(postId: Int) {
         KtorClient.httpClient.patch(HttpRoutes.UNLIKE_POST) {
             parameter("postId", postId)
+        }
+    }
+
+    suspend fun getLikes(postId: Int): List<User> {
+        return try {
+            KtorClient.httpClient.get(HttpRoutes.GET_LIKES) {
+                parameter("postId", postId)
+            }.body()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            emptyList()
         }
     }
 

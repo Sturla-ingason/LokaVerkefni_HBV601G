@@ -9,6 +9,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -18,6 +19,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import main.app.R
 import main.app.adapters.CommentAdapter
+import main.app.adapters.UserAdapter
 import main.app.dataModel.Comment
 import main.app.dataModel.Post
 import main.app.repository.CommentRepository
@@ -97,10 +99,9 @@ class PostDetailFragment : DialogFragment() {
             }
         }
 
-        // Like Count Click Logic
+        // Like Count Click Logic - Show list of users who liked
         likeCountText.setOnClickListener {
-            // Here you could show another dialog with the list of users who liked the post
-            Toast.makeText(context, "Feature: See who liked (Coming soon)", Toast.LENGTH_SHORT).show()
+            showLikesDialog()
         }
 
         // Comments RecyclerView
@@ -133,8 +134,40 @@ class PostDetailFragment : DialogFragment() {
 
         closeButton.setOnClickListener { dismiss() }
         
-        // Load fresh comments if needed
         refreshComments()
+    }
+
+    private fun showLikesDialog() {
+        val postId = post.postID ?: return
+        
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val likedUsers = withContext(Dispatchers.IO) {
+                    postRepository.getLikes(postId)
+                }
+                
+                if (likedUsers.isEmpty()) {
+                    Toast.makeText(context, "No likes yet", Toast.LENGTH_SHORT).show()
+                    return@launch
+                }
+
+                val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_likes_list, null)
+                val recyclerView = dialogView.findViewById<RecyclerView>(R.id.likesRecyclerView)
+                recyclerView.layoutManager = LinearLayoutManager(context)
+                
+                AlertDialog.Builder(requireContext())
+                    .setView(dialogView)
+                    .setNegativeButton("Close", null)
+                    .show()
+
+                // Pass an empty listener to UserAdapter to remove navigation
+                val adapter = UserAdapter(likedUsers) { }
+                recyclerView.adapter = adapter
+                
+            } catch (e: Exception) {
+                Toast.makeText(context, "Failed to load likes", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     private fun refreshComments() {
@@ -146,7 +179,6 @@ class PostDetailFragment : DialogFragment() {
                 }
                 commentAdapter.updateData(freshComments)
             } catch (e: Exception) {
-                // Fail silently or log
             }
         }
     }

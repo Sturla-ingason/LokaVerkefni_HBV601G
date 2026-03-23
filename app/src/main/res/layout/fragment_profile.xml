@@ -112,17 +112,6 @@
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:src="@drawable/settings"
                 android:contentDescription="@string/settings_title" />
-```
-
-To be precise about placement, the structure should look like this afterward:
-```
-<LinearLayout>           ← top-level horizontal header
-    <LinearLayout>       ← profile picture + username
-    </LinearLayout>
-    <LinearLayout>       ← following/followers counts
-    </LinearLayout>
-    <ImageButton ... />  ← THIS IS WHAT YOU ADD
-</LinearLayout>          ← end of header
 
         <!-- for posts of logged inn user -->
         <LinearLayout
