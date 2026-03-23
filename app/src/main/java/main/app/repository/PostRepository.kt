@@ -1,10 +1,15 @@
 package main.app.repository
 
 import io.ktor.client.call.body
+import io.ktor.client.request.forms.MultiPartFormDataContent
+import io.ktor.client.request.forms.formData
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
 import io.ktor.client.request.patch
 import io.ktor.client.request.post
+import io.ktor.client.request.setBody
+import io.ktor.http.Headers
+import io.ktor.http.HttpHeaders
 import main.app.apiConnections.HttpRoutes
 import main.app.apiConnections.KtorClient
 import main.app.dataModel.Post
@@ -40,6 +45,22 @@ class PostRepository {
             e.printStackTrace()
             emptyList()
         }
+    }
+
+    suspend fun createPost(description: String, imageBytes: ByteArray?, mimeType: String?): Post {
+        return KtorClient.httpClient.post(HttpRoutes.CREATE_POST) {
+            setBody(MultiPartFormDataContent(
+                formData {
+                    append("description", description)
+                    if (imageBytes != null && mimeType != null) {
+                        append("image", imageBytes, Headers.build {
+                            append(HttpHeaders.ContentType, mimeType)
+                            append(HttpHeaders.ContentDisposition, "filename=\"photo.jpg\"")
+                        })
+                    }
+                }
+            ))
+        }.body()
     }
 
 }

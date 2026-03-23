@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--LinearLayout orientation horizontal -->
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
@@ -11,7 +10,6 @@
     android:orientation="horizontal"
     android:padding="10dp">
 
-    <!--TextView for displaying Name -->
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -23,14 +21,12 @@
         app:cardElevation="3dp"
         app:cardUseCompatPadding="true">
 
-        <!--LinearLayout orientation Vertical -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="15dp"
             android:orientation="vertical">
 
-            <!--TextView for displaying Name -->
             <TextView
                 android:id="@+id/postTitle"
                 android:layout_width="wrap_content"
@@ -39,7 +35,17 @@
                 android:textSize="20sp"
                 tools:text="Name" />
 
-            <!--TextView for displaying Email -->
+            <ImageView
+                android:id="@+id/postImage"
+                android:layout_width="match_parent"
+                android:layout_height="250dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp"
+                android:scaleType="centerCrop"
+                android:visibility="gone"
+                tools:visibility="visible"
+                tools:src="@android:drawable/ic_menu_gallery" />
+
             <TextView
                 android:id="@+id/postBody"
                 android:layout_width="match_parent"
@@ -47,11 +53,12 @@
                 android:layout_weight="1"
                 android:textColor="#454545"
                 android:textSize="16sp"
-                tools:text="Email" />
+                tools:text="Description" />
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp">
 
                 <Button
                     android:id="@+id/likeButton"
@@ -64,9 +71,10 @@
                     android:id="@+id/likeCounter"
                     android:gravity="center"
                     android:layout_width="0dp"
-                    android:layout_weight="0.2"
-                    android:layout_height="wrap_content"
-                    android:text="0"/>
+                    android:layout_weight="0.4"
+                    android:layout_height="match_parent"
+                    android:text="0"
+                    android:textStyle="bold" />
 
                 <Button
                     android:id="@+id/commentButton"

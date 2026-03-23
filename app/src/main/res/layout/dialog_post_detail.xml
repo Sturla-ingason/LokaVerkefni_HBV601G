@@ -20,6 +20,16 @@
             android:textStyle="bold"
             tools:text="Username" />
 
+        <ImageView
+            android:id="@+id/detailImage"
+            android:layout_width="match_parent"
+            android:layout_height="300dp"
+            android:layout_marginTop="8dp"
+            android:scaleType="fitCenter"
+            android:visibility="gone"
+            tools:visibility="visible"
+            tools:src="@android:drawable/ic_menu_gallery" />
+
         <TextView
             android:id="@+id/detailDescription"
             android:layout_width="match_parent"

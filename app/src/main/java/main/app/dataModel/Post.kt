@@ -14,15 +14,5 @@ data class Post(
     val likeCount: Int? = null,
     val likedByCurrentUser: Boolean? = null,
     val comments: List<Comment>? = null,
+    val imageIds: List<Long>? = null,
 ): java.io.Serializable
-
-
-/**
- * Auka shit sem ég tók út til að prófa annað.
- * // Potential alternative names from server
- *     @SerialName("postText") val postText: String? = null,
- *     @SerialName("description") val description: String? = null,
- *     @SerialName("content") val content: String? = null,
- *     @SerialName("username") val username: String? = null,
- *     @SerialName("_id") val mongoId: String? = null
- */

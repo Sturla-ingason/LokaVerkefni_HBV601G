@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -14,12 +15,14 @@ import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import main.app.R
 import main.app.adapters.CommentAdapter
 import main.app.adapters.UserAdapter
+import main.app.apiConnections.HttpRoutes
 import main.app.dataModel.Comment
 import main.app.dataModel.Post
 import main.app.repository.CommentRepository
@@ -67,6 +70,7 @@ class PostDetailFragment : DialogFragment() {
 
         val username = view.findViewById<TextView>(R.id.detailUsername)
         val description = view.findViewById<TextView>(R.id.detailDescription)
+        val detailImage = view.findViewById<ImageView>(R.id.detailImage)
         likeButton = view.findViewById(R.id.detailLikeButton)
         likeCountText = view.findViewById(R.id.detailLikeCount)
         val commentsRecyclerView = view.findViewById<RecyclerView>(R.id.detailCommentsRecyclerView)
@@ -76,6 +80,19 @@ class PostDetailFragment : DialogFragment() {
 
         username.text = post.username ?: "Unknown User"
         description.text = post.description ?: ""
+        
+        // Load image if available
+        if (!post.imageIds.isNullOrEmpty()) {
+            detailImage.visibility = View.VISIBLE
+            val imageUrl = "${HttpRoutes.GET_IMAGE}/${post.imageIds!![0]}"
+            Glide.with(this)
+                .load(imageUrl)
+                .placeholder(android.R.drawable.ic_menu_gallery)
+                .into(detailImage)
+        } else {
+            detailImage.visibility = View.GONE
+        }
+
         updateLikeUI()
 
         // Like Button Logic
