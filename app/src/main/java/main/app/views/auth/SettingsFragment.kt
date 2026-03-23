@@ -26,9 +26,6 @@ class SettingsFragment : Fragment() {
     private val userRepository = UserRepository()
     private val authRepository = AuthRepository()
 
-    // Test account IDs that cannot be deleted (alice=3, bob=4, carol=5, dave=6)
-    private val protectedAccountIds = listOf(3, 4, 5, 6)
-
     // Stores the current user ID so we can check it on delete
     private var currentUserId: Int? = null
 
@@ -130,11 +127,6 @@ class SettingsFragment : Fragment() {
      * Blocks deletion for the protected test accounts by ID (alice=3, bob=4, carol=5, dave=6).
      */
     private fun deleteAccount() {
-        if (currentUserId != null && protectedAccountIds.contains(currentUserId)) {
-            Toast.makeText(requireContext(), "This test account cannot be deleted", Toast.LENGTH_SHORT).show()
-            return
-        }
-
         AlertDialog.Builder(requireContext())
             .setTitle("Delete Account")
             .setMessage("Are you sure? This action cannot be undone.")

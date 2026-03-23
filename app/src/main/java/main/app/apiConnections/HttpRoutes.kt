@@ -30,6 +30,10 @@ object HttpRoutes {
     val UNLIKE_POST = "$BASE_URL/post/unlike"
     val GET_COMMENTS = "$BASE_URL/post/comment"
     val CREATE_COMMENT = "$BASE_URL/post/comment/create"
+    val GET_LIKES = "$BASE_URL/post/likes"
+
+    // Images
+    val GET_IMAGE = "$BASE_URL/image"
 
     // Search
     val USER_SEARCH = "$BASE_URL/usersearch"

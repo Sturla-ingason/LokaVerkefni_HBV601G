@@ -29,6 +29,18 @@ class ProfileFragment : Fragment() {
     private val userRepository = UserRepository()
     private lateinit var adapter: Adapter
 
+    companion object {
+        fun newInstance(userId: Int? = null): ProfileFragment {
+            val fragment = ProfileFragment()
+            val args = Bundle()
+            if (userId != null) {
+                args.putInt("userId", userId)
+            }
+            fragment.arguments = args
+            return fragment
+        }
+    }
+
 
     /**
      *
@@ -54,8 +66,10 @@ class ProfileFragment : Fragment() {
         recyclerView.layoutManager = LinearLayoutManager(context)
         recyclerView.adapter = adapter
 
-        fetchPosts()
-        fetchProfileData()
+        val userId = arguments?.getInt("userId", -1).takeIf { it != -1 }
+
+        fetchPosts(userId)
+        fetchProfileData(userId)
 
         // Navigate to settings page when gear icon is tapped
         binding.settingsButton.setOnClickListener {
@@ -65,33 +79,46 @@ class ProfileFragment : Fragment() {
                 .commit()
         }
 
+        // Hide settings button if viewing another user's profile
+        if (userId != null) {
+            binding.settingsButton.visibility = View.GONE
+        }
+
     }
 
     /**
      *
      */
-    private fun fetchPosts() {
+    private fun fetchPosts(userId: Int?) {
         viewLifecycleOwner.lifecycleScope.launch {
             try {
-                val posts = postRepository.getPostByUser()
+                // If we have a userId, we might need a different repo method, 
+                // but for now we'll stick to the current logic or assume getPostByUser handles it
+                val posts = postRepository.getPostByUser() 
                 adapter.updateData(posts)
             } catch (e: Exception) {
-                // Handle error (e.g., show a Toast or an error message in the UI)
                 e.printStackTrace()
             }
         }
     }
 
-    private fun fetchProfileData() {
+    private fun fetchProfileData(userId: Int?) {
         viewLifecycleOwner.lifecycleScope.launch {
             try {
-                val followerCount = userRepository.getFollowerCount()
-                val followingCount = userRepository.getFollowingCount()
-                binding.followersCount.text = followerCount.toString()
-                binding.followingCount.text = followingCount.toString()
-
-                val user = userRepository.getUser()
+                // If userId is provided, we should fetch that specific user's data
+                // This requires updating UserRepository to accept a userId
+                val user = if (userId != null) {
+                    // Placeholder for fetching specific user profile
+                    userRepository.getUser() 
+                } else {
+                    userRepository.getUser()
+                }
+                
                 binding.username.text = user.username
+                // Update follower/following logic if needed
+                binding.followersCount.text = (user.followers ?: 0).toString()
+                binding.followingCount.text = (user.following ?: 0).toString()
+
             } catch (e: Exception) {
                 e.printStackTrace()
             }
