@@ -13,6 +13,6 @@ data class User (
     val password: String? = null,
     val bio: String? = null,
     val imageId: Int? = null,
-    val following: Int? = null,
-    val followers: Int? = null,
+    val followingCount: Int? = null,
+    val followerCount: Int? = null,
 ):java.io.Serializable

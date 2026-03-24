@@ -116,8 +116,8 @@ class ProfileFragment : Fragment() {
                 
                 binding.username.text = user.username
                 // Update follower/following logic if needed
-                binding.followersCount.text = (user.followers ?: 0).toString()
-                binding.followingCount.text = (user.following ?: 0).toString()
+                binding.followersCount.text = (user.followerCount ?: 0).toString()
+                binding.followingCount.text = (user.followingCount ?: 0).toString()
 
             } catch (e: Exception) {
                 e.printStackTrace()
