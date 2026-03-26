@@ -14,7 +14,7 @@ import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.launch
 import main.app.R
 import main.app.adapters.Adapter
-import main.app.dataModel.Post
+import main.app.adapters.UserAdapter
 import main.app.repository.SearchRepository
 
 class SearchFragment : Fragment() {
@@ -27,6 +27,7 @@ class SearchFragment : Fragment() {
     private lateinit var searchRecyclerView: RecyclerView
 
     private lateinit var adapter: Adapter
+    private lateinit var userAdapter: UserAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -48,6 +49,10 @@ class SearchFragment : Fragment() {
         searchRecyclerView.layoutManager = LinearLayoutManager(requireContext())
         searchRecyclerView.adapter = adapter
 
+        userAdapter = UserAdapter(emptyList()) { user ->
+            user.userID?.let { openProfile(it) }
+        }
+
         searchButton.setOnClickListener {
             val query = searchInput.text.toString().trim()
             performSearch(query)
@@ -55,34 +60,30 @@ class SearchFragment : Fragment() {
     }
 
     private fun performSearch(query: String) {
-        if (query.isBlank()) {
-            adapter.updateData(emptyList())
-            showStatus("Enter a username or hashtag")
-            return
-        }
+        if (query.isBlank()) return
 
         viewLifecycleOwner.lifecycleScope.launch {
             try {
-                val results: List<Post> = if (query.startsWith("#")) {
-                    searchRepository.searchHashtags(query)
+                if (query.startsWith("#")) {
+                    val posts = searchRepository.searchHashtags(query)
+                    searchRecyclerView.adapter = adapter
+                    adapter.updateData(posts)
                 } else {
-                    searchRepository.searchUsers(query)
+                    val users = searchRepository.searchUsers(query)
+                    searchRecyclerView.adapter = userAdapter
+                    userAdapter.updateData(users)
                 }
-
-                adapter.updateData(results)
-
-                if (results.isEmpty()) {
-                    showStatus("No results found")
-                } else {
-                    showStatus("${results.size} result(s) found")
-                }
-
             } catch (e: Exception) {
                 e.printStackTrace()
-                adapter.updateData(emptyList())
-                showStatus("Search failed")
             }
         }
+    }
+
+    private fun openProfile(userId: Int) {
+        parentFragmentManager.beginTransaction()
+            .replace(R.id.flFragment, ProfileFragment.newInstance(userId))
+            .addToBackStack(null)
+            .commit()
     }
 
     private fun showStatus(message: String) {

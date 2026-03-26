@@ -63,4 +63,10 @@ class PostRepository {
         }.body()
     }
 
+    suspend fun getPostsByUserId(userId: Int): List<Post> {
+        return KtorClient.httpClient.get(HttpRoutes.GET_PROFILE_POSTS) {
+            parameter("userId", userId)
+        }.body()
+    }
+
 }
