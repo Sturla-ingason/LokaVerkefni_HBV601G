@@ -66,7 +66,8 @@ class ProfileFragment : Fragment() {
         recyclerView.layoutManager = LinearLayoutManager(context)
         recyclerView.adapter = adapter
 
-        val userId = arguments?.getInt("userId", -1).takeIf { it != -1 }
+        val passedUserId = arguments?.getInt("userId")
+        val userId = if (passedUserId == null || passedUserId == -1) null else passedUserId
 
         fetchPosts(userId)
         fetchProfileData(userId)
@@ -94,7 +95,11 @@ class ProfileFragment : Fragment() {
             try {
                 // If we have a userId, we might need a different repo method, 
                 // but for now we'll stick to the current logic or assume getPostByUser handles it
-                val posts = postRepository.getPostByUser() 
+                val posts = if (userId != null) {
+                    postRepository.getPostsByUserId(userId)
+                } else {
+                    postRepository.getPostByUser()
+                }
                 adapter.updateData(posts)
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -109,7 +114,7 @@ class ProfileFragment : Fragment() {
                 // This requires updating UserRepository to accept a userId
                 val user = if (userId != null) {
                     // Placeholder for fetching specific user profile
-                    userRepository.getUser() 
+                    userRepository.getUserById(userId)
                 } else {
                     userRepository.getUser()
                 }

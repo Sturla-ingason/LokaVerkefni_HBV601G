@@ -26,6 +26,12 @@ class UserRepository {
         return KtorClient.httpClient.get(HttpRoutes.GET_USER).body()
     }
 
+    suspend fun getUserById(userId: Int): User {
+        return KtorClient.httpClient.get(HttpRoutes.PROFILE) {
+            parameter("userId", userId)
+        }.body()
+    }
+
     /**
      * Updates the user's profile information
      * @param username the new username
