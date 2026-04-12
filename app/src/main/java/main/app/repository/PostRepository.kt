@@ -73,11 +73,32 @@ class PostRepository {
         }
     }
 
-    suspend fun editPost(postId: Int, description: String): Post {
-        return KtorClient.httpClient.put(HttpRoutes.EDIT_POST) {
-            parameter("postId", postId)
-            parameter("description", description)
-        }.body()
+    suspend fun editPost(
+        postId: Int,
+        description: String,
+        removeImageIds: List<Long>? = null,
+        imageBytes: ByteArray? = null,
+        mimeType: String? = null
+    ): Post {
+        return if (imageBytes != null && mimeType != null) {
+            KtorClient.httpClient.put(HttpRoutes.EDIT_POST) {
+                parameter("postId", postId)
+                parameter("description", description)
+                removeImageIds?.forEach { id -> parameter("removeImageIds", id) }
+                setBody(MultiPartFormDataContent(formData {
+                    append("image", imageBytes, Headers.build {
+                        append(HttpHeaders.ContentType, mimeType)
+                        append(HttpHeaders.ContentDisposition, "filename=\"photo.jpg\"")
+                    })
+                }))
+            }.body()
+        } else {
+            KtorClient.httpClient.put(HttpRoutes.EDIT_POST) {
+                parameter("postId", postId)
+                parameter("description", description)
+                removeImageIds?.forEach { id -> parameter("removeImageIds", id) }
+            }.body()
+        }
     }
 
     suspend fun getPostsByUserId(userId: Int): List<Post> {

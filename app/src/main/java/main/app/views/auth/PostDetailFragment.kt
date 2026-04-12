@@ -101,6 +101,7 @@ class PostDetailFragment : DialogFragment() {
             val editFragment = EditPostFragment.newInstance(
                 postId = postId,
                 currentDescription = descriptionText.text.toString(),
+                imageIds = post.imageIds,
                 onEdited = { updatedDescription ->
                     descriptionText.text = updatedDescription
                 },
