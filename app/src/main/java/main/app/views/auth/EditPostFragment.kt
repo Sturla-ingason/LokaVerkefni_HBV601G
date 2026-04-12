@@ -37,15 +37,24 @@ class EditPostFragment : DialogFragment() {
     private lateinit var addImageButton: Button
     private lateinit var removeImageButton: Button
 
+    /**
+     * Allows a user to pick the new image from the gallery for the post.
+     * (if we pick a new image it cancells the removal of the olde one since we are replacing it either way)
+     */
     private val pickImage = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         uri ?: return@registerForActivityResult
         newImageUri = uri
-        removeExistingImage = false             // picking a new image cancels any pending remove
+        removeExistingImage = false
         imagePreview.setImageURI(uri)
         imagePreview.visibility = View.VISIBLE
         removeImageButton.visibility = View.VISIBLE
     }
 
+
+    /**
+     * Commpanion object that helps us safely pass data to create a new EditPost Fragment
+     * @return returns a new EditPostFragment
+     */
     companion object {
         fun newInstance(
             postId: Int,
@@ -68,6 +77,10 @@ class EditPostFragment : DialogFragment() {
         }
     }
 
+
+    /**
+     * Creates the view and loads upp the xml file from dialog_edit_post
+     */
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -76,14 +89,22 @@ class EditPostFragment : DialogFragment() {
         return inflater.inflate(R.layout.dialog_edit_post, container, false)
     }
 
+
+    /**
+     *  Kinda the main function of the file, helps with connections to data base through the
+     *  repository classes and the event handlers for everything
+     */
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        //reading back out of the bundle the infromation that we need
         val postId = arguments?.getInt("postId") ?: return
         val currentDescription = arguments?.getString("currentDescription") ?: ""
         val storedImageId = arguments?.getLong("existingImageId", -1L).takeIf { it != -1L }
         existingImageId = storedImageId
 
+
+        //Conecting all the xml elements that we need
         val descriptionInput = view.findViewById<EditText>(R.id.editPostDescription)
         val saveButton = view.findViewById<Button>(R.id.editPostSaveButton)
         val cancelButton = view.findViewById<Button>(R.id.editPostCancelButton)
@@ -92,8 +113,11 @@ class EditPostFragment : DialogFragment() {
         addImageButton = view.findViewById(R.id.editPostAddImageButton)
         removeImageButton = view.findViewById(R.id.editPostRemoveImageButton)
 
+
+        //Sets the current descriptoin inn the input box for change
         descriptionInput.setText(currentDescription)
         descriptionInput.setSelection(currentDescription.length)
+
 
         // Show existing image if the post has one
         if (existingImageId != null) {
@@ -105,10 +129,14 @@ class EditPostFragment : DialogFragment() {
                 .into(imagePreview)
         }
 
+
+        //Opens the user gallery and allows them to pick a new image
         addImageButton.setOnClickListener {
             pickImage.launch("image/*")
         }
 
+
+        //Allows the user to remove a image from the post
         removeImageButton.setOnClickListener {
             newImageUri = null
             removeExistingImage = true
@@ -117,14 +145,20 @@ class EditPostFragment : DialogFragment() {
             removeImageButton.visibility = View.GONE
         }
 
+
+        //Saves the changes made to the post inn the edit dialog
         saveButton.setOnClickListener {
+            //Geting the new discription and error handeling for it
             val newDescription = descriptionInput.text.toString().trim()
             if (newDescription.isEmpty()) {
                 Toast.makeText(context, "Description cannot be empty", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
+            //When the safe button is clicked we disable it straight away so that it can not be clicked again
             saveButton.isEnabled = false
+
+
             viewLifecycleOwner.lifecycleScope.launch {
                 try {
                     val removeIds = if (removeExistingImage && existingImageId != null) {
@@ -140,6 +174,7 @@ class EditPostFragment : DialogFragment() {
                         mimeType = requireContext().contentResolver.getType(uri)
                     }
 
+                    //Call to the api for the update post call
                     val updatedPost = withContext(Dispatchers.IO) {
                         postRepository.editPost(postId, newDescription, removeIds, imageBytes, mimeType)
                     }
@@ -152,9 +187,12 @@ class EditPostFragment : DialogFragment() {
             }
         }
 
+        //Closes the dialog
         cancelButton.setOnClickListener { dismiss() }
 
+        //Event handler for the delete button
         deleteButton.setOnClickListener {
+            //Creates a alert dialog to ask if the user really want's to delete the post
             AlertDialog.Builder(requireContext())
                 .setTitle("Delete Post")
                 .setMessage("Are you sure you want to delete this post?")
@@ -180,6 +218,10 @@ class EditPostFragment : DialogFragment() {
         }
     }
 
+
+    /**
+     * Called when we need to start the dialog.
+     */
     override fun onStart() {
         super.onStart()
         dialog?.window?.setLayout(

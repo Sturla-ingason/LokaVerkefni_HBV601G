@@ -3,6 +3,7 @@ package main.app.repository
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
+import io.ktor.client.request.patch
 import io.ktor.client.request.post
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.isSuccess
@@ -56,6 +57,25 @@ class UserRepository {
             false
         }
     }
+
+    suspend fun followUser(userId: Int) {
+        KtorClient.httpClient.patch(HttpRoutes.FOLLOW_USER) {
+            parameter("userID", userId)
+        }
+    }
+
+    suspend fun unfollowUser(userId: Int) {
+        KtorClient.httpClient.patch(HttpRoutes.UNFOLLOW_USER) {
+            parameter("userID", userId)
+        }
+    }
+
+    suspend fun isFollowing(userId: Int): Boolean {
+        return KtorClient.httpClient.get(HttpRoutes.IS_FOLLOWING) {
+            parameter("userID", userId)
+        }.body()
+    }
+
 
     /**
      * Deletes the current user's account

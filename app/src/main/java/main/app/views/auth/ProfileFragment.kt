@@ -8,7 +8,9 @@ import android.view.ViewGroup
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import main.app.R
 import main.app.adapters.Adapter
 import main.app.databinding.FragmentProfileBinding
@@ -80,9 +82,43 @@ class ProfileFragment : Fragment() {
                 .commit()
         }
 
-        // Hide settings button if viewing another user's profile
+        // Hide settings button and show back + follow buttons if viewing another user's profile
         if (userId != null) {
             binding.settingsButton.visibility = View.GONE
+            binding.backButton.visibility = View.VISIBLE
+            binding.backButton.setOnClickListener {
+                parentFragmentManager.popBackStack()
+            }
+
+            binding.followButton.visibility = View.VISIBLE
+            var isFollowing = false
+
+            // Check current follow state
+            viewLifecycleOwner.lifecycleScope.launch {
+                try {
+                    isFollowing = withContext(Dispatchers.IO) {
+                        userRepository.isFollowing(userId)
+                    }
+                    updateFollowButton(isFollowing)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+
+            binding.followButton.setOnClickListener {
+                viewLifecycleOwner.lifecycleScope.launch {
+                    try {
+                        withContext(Dispatchers.IO) {
+                            if (isFollowing) userRepository.unfollowUser(userId)
+                            else userRepository.followUser(userId)
+                        }
+                        isFollowing = !isFollowing
+                        updateFollowButton(isFollowing)
+                    } catch (e: Exception) {
+                        android.widget.Toast.makeText(context, "Failed to update follow", android.widget.Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
         }
 
     }
@@ -105,6 +141,10 @@ class ProfileFragment : Fragment() {
                 e.printStackTrace()
             }
         }
+    }
+
+    private fun updateFollowButton(isFollowing: Boolean) {
+        binding.followButton.text = if (isFollowing) "Unfollow" else "Follow"
     }
 
     private fun fetchProfileData(userId: Int?) {

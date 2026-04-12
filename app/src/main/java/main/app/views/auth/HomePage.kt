@@ -21,7 +21,8 @@ class HomePage : Fragment() {
 
 
     /**
-     *
+     * Called when the view is created. Inflates the view with fragment_home_page
+     * @return the inflated view
      */
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -32,7 +33,7 @@ class HomePage : Fragment() {
 
 
     /**
-     *
+     * Sets upp the recicle viewer for the posts.
      */
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -47,7 +48,7 @@ class HomePage : Fragment() {
 
 
     /**
-     *
+     *  Fetches all the posts that are supposed to be on the users homepage.
      */
     private fun fetchPosts() {
         viewLifecycleOwner.lifecycleScope.launch {

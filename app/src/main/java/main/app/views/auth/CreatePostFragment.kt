@@ -32,6 +32,10 @@ class CreatePostFragment : Fragment(R.layout.fragment_create_post) {
         }
     }
 
+
+    /**
+     *
+     */
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -40,6 +44,9 @@ class CreatePostFragment : Fragment(R.layout.fragment_create_post) {
         val postButton = view.findViewById<Button>(R.id.postButton)
         val postText = view.findViewById<EditText>(R.id.postText)
 
+
+        //listener for taking a picture. When the picture has been taken this listener will fier and show
+        //the picture in the preview
         parentFragmentManager.setFragmentResultListener(REQ_KEY, viewLifecycleOwner) { _, bundle ->
             val uriString = bundle.getString(BUNDLE_URI) ?: return@setFragmentResultListener
             val uri = uriString.toUri()
@@ -50,7 +57,9 @@ class CreatePostFragment : Fragment(R.layout.fragment_create_post) {
         addPhotoButton.setOnClickListener { showPhotoDialog() }
 
 
+        //onclick Listener for the post button
         postButton.setOnClickListener {
+
             val description = postText.text.toString()
             if (description.isBlank() && selectedPhotoUri == null) {
                 Toast.makeText(requireContext(), "Please add a description or a photo", Toast.LENGTH_SHORT).show()
@@ -84,6 +93,10 @@ class CreatePostFragment : Fragment(R.layout.fragment_create_post) {
         }
     }
 
+
+    /**
+     * This is the dialog to let the user pick how they want to add the photo
+     */
     private fun showPhotoDialog() {
         AlertDialog.Builder(requireContext())
             .setTitle("Add Photo")

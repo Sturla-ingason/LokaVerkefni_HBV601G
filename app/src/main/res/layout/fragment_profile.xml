@@ -116,16 +116,46 @@
 
         </LinearLayout>
 
-        <!-- Settings button -->
+        <!-- Action row: back (other profiles) | spacer | follow (other profiles) | settings (own profile) -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp">
+
+            <ImageButton
+                android:id="@+id/backButton"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@android:drawable/ic_media_previous"
+                android:contentDescription="Back"
+                android:visibility="gone" />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1" />
+
+            <Button
+                android:id="@+id/followButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Follow"
+                android:visibility="gone" />
+
             <ImageButton
                 android:id="@+id/settingsButton"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
-                android:layout_gravity="center_vertical"
-                android:layout_marginEnd="8dp"
+                android:layout_marginStart="8dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:src="@drawable/settings"
                 android:contentDescription="@string/settings_title" />
+
+        </LinearLayout>
 
         <!-- for posts of logged inn user -->
         <LinearLayout
