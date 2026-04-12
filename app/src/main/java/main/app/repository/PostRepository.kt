@@ -7,6 +7,8 @@ import io.ktor.client.request.get
 import io.ktor.client.request.parameter
 import io.ktor.client.request.patch
 import io.ktor.client.request.post
+import io.ktor.client.request.delete
+import io.ktor.client.request.put
 import io.ktor.client.request.setBody
 import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
@@ -17,11 +19,13 @@ import main.app.dataModel.User
 
 class PostRepository {
     suspend fun getPosts(): List<Post> {
-        return KtorClient.httpClient.get(HttpRoutes.GET_FEED).body()
+        return KtorClient.httpClient.get(HttpRoutes.GET_FEED).body<List<Post>>()
+            .sortedByDescending { it.postID }
     }
 
     suspend fun getPostByUser(): List<Post> {
-        return KtorClient.httpClient.get(HttpRoutes.GET_USERS_POSTS).body()
+        return KtorClient.httpClient.get(HttpRoutes.GET_USERS_POSTS).body<List<Post>>()
+            .sortedByDescending { it.postID }
     }
 
     suspend fun likePost(postId: Int) {
@@ -63,10 +67,23 @@ class PostRepository {
         }.body()
     }
 
+    suspend fun deletePost(postId: Int) {
+        KtorClient.httpClient.delete(HttpRoutes.DELETE_POST) {
+            parameter("postID", postId)
+        }
+    }
+
+    suspend fun editPost(postId: Int, description: String): Post {
+        return KtorClient.httpClient.put(HttpRoutes.EDIT_POST) {
+            parameter("postId", postId)
+            parameter("description", description)
+        }.body()
+    }
+
     suspend fun getPostsByUserId(userId: Int): List<Post> {
         return KtorClient.httpClient.get(HttpRoutes.GET_PROFILE_POSTS) {
             parameter("userId", userId)
-        }.body()
+        }.body<List<Post>>().sortedByDescending { it.postID }
     }
 
 }

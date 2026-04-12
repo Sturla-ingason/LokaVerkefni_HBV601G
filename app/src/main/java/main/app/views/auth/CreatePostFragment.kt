@@ -49,6 +49,7 @@ class CreatePostFragment : Fragment(R.layout.fragment_create_post) {
 
         addPhotoButton.setOnClickListener { showPhotoDialog() }
 
+
         postButton.setOnClickListener {
             val description = postText.text.toString()
             if (description.isBlank() && selectedPhotoUri == null) {
