@@ -84,6 +84,15 @@ class PostDetailFragment : DialogFragment() {
         username.text = post.username ?: "Unknown User"
         descriptionText.text = post.description ?: ""
 
+        username.setOnClickListener {
+            val userId = post.userId ?: return@setOnClickListener
+            dismiss()
+            requireActivity().supportFragmentManager.beginTransaction()
+                .replace(R.id.flFragment, ProfileFragment.newInstance(userId))
+                .addToBackStack(null)
+                .commit()
+        }
+
         // Show edit button if this is the current user's post
         viewLifecycleOwner.lifecycleScope.launch {
             try {

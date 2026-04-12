@@ -25,6 +25,9 @@
                 android:textColor="@android:color/black"
                 android:textSize="22sp"
                 android:textStyle="bold"
+                android:clickable="true"
+                android:focusable="true"
+                android:background="?attr/selectableItemBackground"
                 tools:text="Username" />
 
             <Button
