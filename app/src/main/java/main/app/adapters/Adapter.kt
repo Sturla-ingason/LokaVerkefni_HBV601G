@@ -10,22 +10,18 @@ import androidx.fragment.app.FragmentManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import main.app.R
 import main.app.apiConnections.HttpRoutes
 import main.app.dataModel.Post
-import main.app.repository.PostRepository
 import main.app.views.auth.CommentFragment
 import main.app.views.auth.PostDetailFragment
 
 class Adapter(
     private var postlist: List<Post>,
     private val scope: CoroutineScope,
-    private val fragmentManager: FragmentManager
+    private val fragmentManager: FragmentManager,
+    private val onLikeToggle: (postId: Int) -> Unit
 ): RecyclerView.Adapter<Adapter.ViewHolder>() {
-
-    private val postRepository = PostRepository()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val itemView = LayoutInflater.from(parent.context).inflate(R.layout.post_view, parent, false)
@@ -51,8 +47,7 @@ class Adapter(
             holder.postImage.visibility = View.GONE
         }
 
-        var isLiked = currentItem.likedByCurrentUser ?: false
-        holder.likeButton.text = if (isLiked) "Unlike" else "Like"
+        holder.likeButton.text = if (currentItem.likedByCurrentUser == true) "Unlike" else "Like"
 
         // Open Post Detail on Item Click
         holder.itemView.setOnClickListener {
@@ -62,17 +57,7 @@ class Adapter(
 
         holder.likeButton.setOnClickListener {
             val postId = currentItem.postID ?: return@setOnClickListener
-            if (isLiked) {
-                isLiked = false
-                holder.likeButton.text = "Like"
-                holder.likeCounter.text = ((holder.likeCounter.text.toString().toIntOrNull() ?: 1) - 1).toString()
-                scope.launch(Dispatchers.IO) { postRepository.unlikePost(postId) }
-            } else {
-                isLiked = true
-                holder.likeButton.text = "Unlike"
-                holder.likeCounter.text = ((holder.likeCounter.text.toString().toIntOrNull() ?: 0) + 1).toString()
-                scope.launch(Dispatchers.IO) { postRepository.likePost(postId) }
-            }
+            onLikeToggle(postId)
         }
 
         holder.commentButton.setOnClickListener {

@@ -5,17 +5,17 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import main.app.R
+import main.app.ViewModel.ProfileViewModel
 import main.app.adapters.Adapter
 import main.app.databinding.FragmentProfileBinding
-import main.app.repository.PostRepository
-import main.app.repository.UserRepository
 
 
 /**
@@ -27,10 +27,9 @@ class ProfileFragment : Fragment() {
 
     private var _binding: FragmentProfileBinding? = null
     private val binding get() = _binding!!
-    private val postRepository = PostRepository()
-    private val userRepository = UserRepository()
+    private val viewModel: ProfileViewModel by viewModels()
     private lateinit var adapter: Adapter
-    private var resolvedUserId: Int? = null
+    private var targetUserId: Int? = null
 
     companion object {
         fun newInstance(userId: Int? = null): ProfileFragment {
@@ -64,148 +63,39 @@ class ProfileFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        adapter = Adapter(emptyList(), viewLifecycleOwner.lifecycleScope, childFragmentManager)
+        val passedUserId = arguments?.getInt("userId")
+        targetUserId = if (passedUserId == null || passedUserId == -1) null else passedUserId
+
+        adapter = Adapter(
+            emptyList(),
+            viewLifecycleOwner.lifecycleScope,
+            childFragmentManager,
+            onLikeToggle = { postId -> viewModel.toggleLike(postId) }
+        )
         val recyclerView: RecyclerView = view.findViewById(R.id.recycleViewProfile)
         recyclerView.layoutManager = LinearLayoutManager(context)
         recyclerView.adapter = adapter
 
-        val passedUserId = arguments?.getInt("userId")
-        val userId = if (passedUserId == null || passedUserId == -1) null else passedUserId
-
-        fetchPosts(userId)
-        fetchProfileData(userId)
-
-        // Navigate to settings page when gear icon is tapped
-        binding.settingsButton.setOnClickListener {
-            parentFragmentManager.beginTransaction()
-                .replace(R.id.flFragment, SettingsFragment())
-                .addToBackStack(null)
-                .commit()
-        }
-
-        // Hide settings button and show back + follow buttons if viewing another user's profile
-        if (userId != null) {
-            binding.settingsButton.visibility = View.GONE
-            binding.backButton.visibility = View.VISIBLE
-            binding.backButton.setOnClickListener {
-                parentFragmentManager.popBackStack()
-            }
-
-            binding.followButton.visibility = View.VISIBLE
-            binding.blockButton.visibility = View.VISIBLE
-            var isFollowing = false
-            var isBlocked = false
-
-            // Check current follow and block state
-            viewLifecycleOwner.lifecycleScope.launch {
-                try {
-                    isFollowing = withContext(Dispatchers.IO) { userRepository.isFollowing(userId) }
-                    isBlocked = withContext(Dispatchers.IO) { userRepository.isBlocked(userId) }
-                    updateFollowButton(isFollowing)
-                    updateBlockButton(isBlocked)
-                    // Hide follow button if blocked
-                    binding.followButton.visibility = if (isBlocked) View.GONE else View.VISIBLE
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
-            }
-
-            binding.followButton.setOnClickListener {
-                viewLifecycleOwner.lifecycleScope.launch {
-                    try {
-                        withContext(Dispatchers.IO) {
-                            if (isFollowing) userRepository.unfollowUser(userId)
-                            else userRepository.followUser(userId)
-                        }
-                        isFollowing = !isFollowing
-                        updateFollowButton(isFollowing)
-                    } catch (e: Exception) {
-                        android.widget.Toast.makeText(context, "Failed to update follow", android.widget.Toast.LENGTH_SHORT).show()
-                    }
-                }
-            }
-
-            binding.blockButton.setOnClickListener {
-                val action = if (isBlocked) "Unblock" else "Block"
-                androidx.appcompat.app.AlertDialog.Builder(requireContext())
-                    .setTitle("$action user")
-                    .setMessage("Are you sure you want to $action this user?")
-                    .setPositiveButton(action) { _, _ ->
-                        viewLifecycleOwner.lifecycleScope.launch {
-                            try {
-                                withContext(Dispatchers.IO) {
-                                    if (isBlocked) userRepository.unblockUser(userId)
-                                    else userRepository.blockUser(userId)
-                                }
-                                isBlocked = !isBlocked
-                                if (isBlocked) isFollowing = false
-                                updateBlockButton(isBlocked)
-                                updateFollowButton(isFollowing)
-                                binding.followButton.visibility = if (isBlocked) View.GONE else View.VISIBLE
-                            } catch (e: Exception) {
-                                android.widget.Toast.makeText(context, "Failed to $action user", android.widget.Toast.LENGTH_SHORT).show()
-                            }
-                        }
-                    }
-                    .setNegativeButton("Cancel", null)
-                    .show()
-            }
-        }
-
-    }
-
-    /**
-     *
-     */
-    private fun fetchPosts(userId: Int?) {
+        // Observe posts
         viewLifecycleOwner.lifecycleScope.launch {
-            try {
-                // If we have a userId, we might need a different repo method, 
-                // but for now we'll stick to the current logic or assume getPostByUser handles it
-                val posts = if (userId != null) {
-                    postRepository.getPostsByUserId(userId)
-                } else {
-                    postRepository.getPostByUser()
-                }
+            viewModel.posts.collect { posts ->
                 adapter.updateData(posts)
-            } catch (e: Exception) {
-                e.printStackTrace()
             }
         }
-    }
 
-    private fun updateFollowButton(isFollowing: Boolean) {
-        binding.followButton.text = if (isFollowing) "Unfollow" else "Follow"
-    }
-
-    private fun updateBlockButton(isBlocked: Boolean) {
-        binding.blockButton.text = if (isBlocked) "Unblock" else "Block"
-    }
-
-    private fun fetchProfileData(userId: Int?) {
+        // Observe profile data
         viewLifecycleOwner.lifecycleScope.launch {
-            try {
-                // If userId is provided, we should fetch that specific user's data
-                // This requires updating UserRepository to accept a userId
-                val user = if (userId != null) {
-                    // Placeholder for fetching specific user profile
-                    userRepository.getUserById(userId)
-                } else {
-                    userRepository.getUser()
-                }
-                
+            viewModel.user.collect { user ->
+                user ?: return@collect
                 binding.username.text = user.username
                 binding.followersCount.text = (user.followerCount ?: 0).toString()
                 binding.followingCount.text = (user.followingCount ?: 0).toString()
                 if (!user.bio.isNullOrBlank()) {
                     binding.bio.text = user.bio
-                    binding.bio.visibility = android.view.View.VISIBLE
+                    binding.bio.visibility = View.VISIBLE
                 }
-
-                // Store the resolved user ID and wire up follower/following clicks
-                resolvedUserId = user.userID
                 user.userID?.let { uid ->
-                    val isOwnProfile = userId == null
+                    val isOwnProfile = targetUserId == null
                     binding.followersCount.setOnClickListener {
                         FollowListFragment.newInstance(uid, FollowListFragment.MODE_FOLLOWERS, isOwnProfile)
                             .show(parentFragmentManager, "FollowListFragment")
@@ -215,11 +105,82 @@ class ProfileFragment : Fragment() {
                             .show(parentFragmentManager, "FollowListFragment")
                     }
                 }
-
-            } catch (e: Exception) {
-                e.printStackTrace()
             }
         }
+
+        // Observe follow/block state
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.isFollowing.collect { isFollowing ->
+                binding.followButton.text = if (isFollowing) "Unfollow" else "Follow"
+            }
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.isBlocked.collect { isBlocked ->
+                binding.blockButton.text = if (isBlocked) "Unblock" else "Block"
+                binding.followButton.visibility = if (isBlocked) View.GONE else View.VISIBLE
+            }
+        }
+
+        // Observe errors
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.error.collect { message ->
+                Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        // Navigate to settings page when gear icon is tapped
+        binding.settingsButton.setOnClickListener {
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.flFragment, SettingsFragment())
+                .addToBackStack(null)
+                .commit()
+        }
+
+        // Show/hide buttons depending on own vs other profile
+        if (targetUserId != null) {
+            binding.settingsButton.visibility = View.GONE
+            binding.backButton.visibility = View.VISIBLE
+            binding.followButton.visibility = View.VISIBLE
+            binding.blockButton.visibility = View.VISIBLE
+
+            binding.backButton.setOnClickListener {
+                parentFragmentManager.popBackStack()
+            }
+
+            binding.followButton.setOnClickListener {
+                viewModel.toggleFollow(targetUserId!!)
+            }
+
+            binding.blockButton.setOnClickListener {
+                val isBlocked = viewModel.isBlocked.value
+                val action = if (isBlocked) "Unblock" else "Block"
+                AlertDialog.Builder(requireContext())
+                    .setTitle("$action user")
+                    .setMessage("Are you sure you want to $action this user?")
+                    .setPositiveButton(action) { _, _ -> viewModel.toggleBlock(targetUserId!!) }
+                    .setNegativeButton("Cancel", null)
+                    .show()
+            }
+
+            viewModel.loadFollowBlockState(targetUserId!!)
+        }
+
+        viewModel.loadProfileData(targetUserId)
     }
 
+    fun refreshPosts() {
+        viewModel.loadPosts(targetUserId)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // Reload posts every time the fragment becomes visible so new posts appear immediately
+        viewModel.loadPosts(targetUserId)
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
 }

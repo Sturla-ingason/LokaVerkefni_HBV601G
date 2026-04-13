@@ -15,30 +15,26 @@ class AuthActivity : AppCompatActivity(){
 
         val bottomNavigationView: BottomNavigationView = findViewById(R.id.bottomNavigationView)
 
-        val homePageFragment = HomePage()
-        val searchFragment = SearchFragment()
-        val profileFragment = ProfileFragment()
-        val createPostFragment = CreatePostFragment()
-
-
-        setCurrentFragment(homePageFragment)
+        if(savedInstanceState == null) {
+            setCurrentFragment(HomePage())
+        }
 
         bottomNavigationView.setOnNavigationItemSelectedListener {
             when (it.itemId) {
-                R.id.home -> setCurrentFragment(homePageFragment)
-                R.id.profile -> setCurrentFragment(profileFragment)
-                R.id.search -> setCurrentFragment(searchFragment)
-                R.id.create -> setCurrentFragment(createPostFragment)
+                R.id.home -> setCurrentFragment(HomePage())
+                R.id.profile -> setCurrentFragment(ProfileFragment())
+                R.id.search -> setCurrentFragment(SearchFragment())
+                R.id.create -> setCurrentFragment(CreatePostFragment())
             }
             true
         }
 
     }
 
-    private fun setCurrentFragment(fragment: Fragment) =
-        supportFragmentManager.beginTransaction().apply {
-            replace(R.id.flFragment, fragment)
-            commit()
-        }
+    private fun setCurrentFragment(fragment: Fragment){
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.flFragment, fragment)
+            .commit()
+    }
 
 }
