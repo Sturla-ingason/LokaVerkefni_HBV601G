@@ -92,15 +92,19 @@ class ProfileFragment : Fragment() {
             }
 
             binding.followButton.visibility = View.VISIBLE
+            binding.blockButton.visibility = View.VISIBLE
             var isFollowing = false
+            var isBlocked = false
 
-            // Check current follow state
+            // Check current follow and block state
             viewLifecycleOwner.lifecycleScope.launch {
                 try {
-                    isFollowing = withContext(Dispatchers.IO) {
-                        userRepository.isFollowing(userId)
-                    }
+                    isFollowing = withContext(Dispatchers.IO) { userRepository.isFollowing(userId) }
+                    isBlocked = withContext(Dispatchers.IO) { userRepository.isBlocked(userId) }
                     updateFollowButton(isFollowing)
+                    updateBlockButton(isBlocked)
+                    // Hide follow button if blocked
+                    binding.followButton.visibility = if (isBlocked) View.GONE else View.VISIBLE
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
@@ -119,6 +123,32 @@ class ProfileFragment : Fragment() {
                         android.widget.Toast.makeText(context, "Failed to update follow", android.widget.Toast.LENGTH_SHORT).show()
                     }
                 }
+            }
+
+            binding.blockButton.setOnClickListener {
+                val action = if (isBlocked) "Unblock" else "Block"
+                androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                    .setTitle("$action user")
+                    .setMessage("Are you sure you want to $action this user?")
+                    .setPositiveButton(action) { _, _ ->
+                        viewLifecycleOwner.lifecycleScope.launch {
+                            try {
+                                withContext(Dispatchers.IO) {
+                                    if (isBlocked) userRepository.unblockUser(userId)
+                                    else userRepository.blockUser(userId)
+                                }
+                                isBlocked = !isBlocked
+                                if (isBlocked) isFollowing = false
+                                updateBlockButton(isBlocked)
+                                updateFollowButton(isFollowing)
+                                binding.followButton.visibility = if (isBlocked) View.GONE else View.VISIBLE
+                            } catch (e: Exception) {
+                                android.widget.Toast.makeText(context, "Failed to $action user", android.widget.Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    }
+                    .setNegativeButton("Cancel", null)
+                    .show()
             }
         }
 
@@ -146,6 +176,10 @@ class ProfileFragment : Fragment() {
 
     private fun updateFollowButton(isFollowing: Boolean) {
         binding.followButton.text = if (isFollowing) "Unfollow" else "Follow"
+    }
+
+    private fun updateBlockButton(isBlocked: Boolean) {
+        binding.blockButton.text = if (isBlocked) "Unblock" else "Block"
     }
 
     private fun fetchProfileData(userId: Int?) {

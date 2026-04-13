@@ -70,6 +70,24 @@ class UserRepository {
         }.body()
     }
 
+    suspend fun blockUser(userId: Int) {
+        KtorClient.httpClient.patch(HttpRoutes.BLOCK_USER) {
+            parameter("userID", userId)
+        }
+    }
+
+    suspend fun unblockUser(userId: Int) {
+        KtorClient.httpClient.patch(HttpRoutes.UNBLOCK_USER) {
+            parameter("userID", userId)
+        }
+    }
+
+    suspend fun isBlocked(userId: Int): Boolean {
+        return KtorClient.httpClient.get(HttpRoutes.IS_BLOCKED) {
+            parameter("userID", userId)
+        }.body()
+    }
+
     suspend fun removeFollower(userId: Int) {
         KtorClient.httpClient.patch(HttpRoutes.REMOVE_FOLLOWER) {
             parameter("userID", userId)

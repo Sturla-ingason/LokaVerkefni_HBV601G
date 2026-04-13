@@ -27,6 +27,9 @@ object HttpRoutes {
     val GET_FOLLOWERS = "$BASE_URL/user/allfollowers"
     val GET_FOLLOWING = "$BASE_URL/user/allfollowing"
     val REMOVE_FOLLOWER = "$BASE_URL/user/removefollower"
+    val BLOCK_USER = "$BASE_URL/user/block"
+    val UNBLOCK_USER = "$BASE_URL/user/unblock"
+    val IS_BLOCKED = "$BASE_URL/user/isblocked"
 
     // Posts
     val CREATE_POST = "$BASE_URL/post/create"
