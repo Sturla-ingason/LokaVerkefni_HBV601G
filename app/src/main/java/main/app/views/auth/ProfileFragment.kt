@@ -8,7 +8,9 @@ import android.view.ViewGroup
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import main.app.R
 import main.app.adapters.Adapter
 import main.app.databinding.FragmentProfileBinding
@@ -28,6 +30,7 @@ class ProfileFragment : Fragment() {
     private val postRepository = PostRepository()
     private val userRepository = UserRepository()
     private lateinit var adapter: Adapter
+    private var resolvedUserId: Int? = null
 
     companion object {
         fun newInstance(userId: Int? = null): ProfileFragment {
@@ -80,9 +83,73 @@ class ProfileFragment : Fragment() {
                 .commit()
         }
 
-        // Hide settings button if viewing another user's profile
+        // Hide settings button and show back + follow buttons if viewing another user's profile
         if (userId != null) {
             binding.settingsButton.visibility = View.GONE
+            binding.backButton.visibility = View.VISIBLE
+            binding.backButton.setOnClickListener {
+                parentFragmentManager.popBackStack()
+            }
+
+            binding.followButton.visibility = View.VISIBLE
+            binding.blockButton.visibility = View.VISIBLE
+            var isFollowing = false
+            var isBlocked = false
+
+            // Check current follow and block state
+            viewLifecycleOwner.lifecycleScope.launch {
+                try {
+                    isFollowing = withContext(Dispatchers.IO) { userRepository.isFollowing(userId) }
+                    isBlocked = withContext(Dispatchers.IO) { userRepository.isBlocked(userId) }
+                    updateFollowButton(isFollowing)
+                    updateBlockButton(isBlocked)
+                    // Hide follow button if blocked
+                    binding.followButton.visibility = if (isBlocked) View.GONE else View.VISIBLE
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+
+            binding.followButton.setOnClickListener {
+                viewLifecycleOwner.lifecycleScope.launch {
+                    try {
+                        withContext(Dispatchers.IO) {
+                            if (isFollowing) userRepository.unfollowUser(userId)
+                            else userRepository.followUser(userId)
+                        }
+                        isFollowing = !isFollowing
+                        updateFollowButton(isFollowing)
+                    } catch (e: Exception) {
+                        android.widget.Toast.makeText(context, "Failed to update follow", android.widget.Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+
+            binding.blockButton.setOnClickListener {
+                val action = if (isBlocked) "Unblock" else "Block"
+                androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                    .setTitle("$action user")
+                    .setMessage("Are you sure you want to $action this user?")
+                    .setPositiveButton(action) { _, _ ->
+                        viewLifecycleOwner.lifecycleScope.launch {
+                            try {
+                                withContext(Dispatchers.IO) {
+                                    if (isBlocked) userRepository.unblockUser(userId)
+                                    else userRepository.blockUser(userId)
+                                }
+                                isBlocked = !isBlocked
+                                if (isBlocked) isFollowing = false
+                                updateBlockButton(isBlocked)
+                                updateFollowButton(isFollowing)
+                                binding.followButton.visibility = if (isBlocked) View.GONE else View.VISIBLE
+                            } catch (e: Exception) {
+                                android.widget.Toast.makeText(context, "Failed to $action user", android.widget.Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    }
+                    .setNegativeButton("Cancel", null)
+                    .show()
+            }
         }
 
     }
@@ -107,6 +174,14 @@ class ProfileFragment : Fragment() {
         }
     }
 
+    private fun updateFollowButton(isFollowing: Boolean) {
+        binding.followButton.text = if (isFollowing) "Unfollow" else "Follow"
+    }
+
+    private fun updateBlockButton(isBlocked: Boolean) {
+        binding.blockButton.text = if (isBlocked) "Unblock" else "Block"
+    }
+
     private fun fetchProfileData(userId: Int?) {
         viewLifecycleOwner.lifecycleScope.launch {
             try {
@@ -120,9 +195,26 @@ class ProfileFragment : Fragment() {
                 }
                 
                 binding.username.text = user.username
-                // Update follower/following logic if needed
                 binding.followersCount.text = (user.followerCount ?: 0).toString()
                 binding.followingCount.text = (user.followingCount ?: 0).toString()
+                if (!user.bio.isNullOrBlank()) {
+                    binding.bio.text = user.bio
+                    binding.bio.visibility = android.view.View.VISIBLE
+                }
+
+                // Store the resolved user ID and wire up follower/following clicks
+                resolvedUserId = user.userID
+                user.userID?.let { uid ->
+                    val isOwnProfile = userId == null
+                    binding.followersCount.setOnClickListener {
+                        FollowListFragment.newInstance(uid, FollowListFragment.MODE_FOLLOWERS, isOwnProfile)
+                            .show(parentFragmentManager, "FollowListFragment")
+                    }
+                    binding.followingCount.setOnClickListener {
+                        FollowListFragment.newInstance(uid, FollowListFragment.MODE_FOLLOWING, isOwnProfile)
+                            .show(parentFragmentManager, "FollowListFragment")
+                    }
+                }
 
             } catch (e: Exception) {
                 e.printStackTrace()

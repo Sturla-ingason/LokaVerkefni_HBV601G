@@ -55,6 +55,7 @@ class CreateAccountFragment : Fragment(){
                 return@setOnClickListener
             }
 
+            //Calles the repo for the api call and error handeling for it working or not
             viewLifecycleOwner.lifecycleScope.launch {
                 val success = authRepository.signup(email, username, password)
                 if (success) {

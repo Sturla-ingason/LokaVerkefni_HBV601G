@@ -26,7 +26,7 @@ class CommentFragment : DialogFragment() {
     private val commentRepository = CommentRepository()
 
     /**
-     *
+     * Companion object to let us safely pass information into the CommentFragment.
      */
     companion object {
         fun newInstance(postId: Int, comments: List<Comment>): CommentFragment {
@@ -41,7 +41,7 @@ class CommentFragment : DialogFragment() {
 
 
     /**
-     *
+     * Creates the view for comment fragment
      */
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -53,7 +53,7 @@ class CommentFragment : DialogFragment() {
 
 
     /**
-     *
+     * When the view is created we initialize the handlers for buttons and ipnut fields here.
      */
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -82,7 +82,8 @@ class CommentFragment : DialogFragment() {
 
 
         /**
-         *
+         *  On click listener for the add comment button
+         *  user clicks it when he is ready to add the comment to a post
          */
         addCommentButton.setOnClickListener {
             val text = commentToBeAdded.text.toString().trim()
@@ -105,7 +106,7 @@ class CommentFragment : DialogFragment() {
 
 
     /**
-     *
+     *  What to do when we start the fragment
      */
     override fun onStart() {
         super.onStart()

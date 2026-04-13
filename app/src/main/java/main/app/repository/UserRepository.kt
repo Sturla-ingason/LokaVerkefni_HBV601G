@@ -3,6 +3,7 @@ package main.app.repository
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
+import io.ktor.client.request.patch
 import io.ktor.client.request.post
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.isSuccess
@@ -56,6 +57,61 @@ class UserRepository {
             false
         }
     }
+
+    suspend fun getFollowers(userId: Int): List<User> {
+        return KtorClient.httpClient.get(HttpRoutes.GET_FOLLOWERS) {
+            parameter("userId", userId)
+        }.body()
+    }
+
+    suspend fun getFollowing(userId: Int): List<User> {
+        return KtorClient.httpClient.get(HttpRoutes.GET_FOLLOWING) {
+            parameter("userId", userId)
+        }.body()
+    }
+
+    suspend fun blockUser(userId: Int) {
+        KtorClient.httpClient.patch(HttpRoutes.BLOCK_USER) {
+            parameter("userID", userId)
+        }
+    }
+
+    suspend fun unblockUser(userId: Int) {
+        KtorClient.httpClient.patch(HttpRoutes.UNBLOCK_USER) {
+            parameter("userID", userId)
+        }
+    }
+
+    suspend fun isBlocked(userId: Int): Boolean {
+        return KtorClient.httpClient.get(HttpRoutes.IS_BLOCKED) {
+            parameter("userID", userId)
+        }.body()
+    }
+
+    suspend fun removeFollower(userId: Int) {
+        KtorClient.httpClient.patch(HttpRoutes.REMOVE_FOLLOWER) {
+            parameter("userID", userId)
+        }
+    }
+
+    suspend fun followUser(userId: Int) {
+        KtorClient.httpClient.patch(HttpRoutes.FOLLOW_USER) {
+            parameter("userID", userId)
+        }
+    }
+
+    suspend fun unfollowUser(userId: Int) {
+        KtorClient.httpClient.patch(HttpRoutes.UNFOLLOW_USER) {
+            parameter("userID", userId)
+        }
+    }
+
+    suspend fun isFollowing(userId: Int): Boolean {
+        return KtorClient.httpClient.get(HttpRoutes.IS_FOLLOWING) {
+            parameter("userID", userId)
+        }.body()
+    }
+
 
     /**
      * Deletes the current user's account

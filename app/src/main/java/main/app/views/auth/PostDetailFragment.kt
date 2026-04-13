@@ -23,20 +23,22 @@ import main.app.R
 import main.app.adapters.CommentAdapter
 import main.app.adapters.UserAdapter
 import main.app.apiConnections.HttpRoutes
-import main.app.dataModel.Comment
 import main.app.dataModel.Post
 import main.app.repository.CommentRepository
 import main.app.repository.PostRepository
+import main.app.repository.UserRepository
 
 class PostDetailFragment : DialogFragment() {
 
     private lateinit var post: Post
     private val postRepository = PostRepository()
     private val commentRepository = CommentRepository()
+    private val userRepository = UserRepository()
     private lateinit var commentAdapter: CommentAdapter
-    
+
     private lateinit var likeButton: Button
     private lateinit var likeCountText: TextView
+    private lateinit var descriptionText: TextView
     private var isLiked: Boolean = false
     private var currentLikeCount: Int = 0
 
@@ -69,17 +71,55 @@ class PostDetailFragment : DialogFragment() {
         super.onViewCreated(view, savedInstanceState)
 
         val username = view.findViewById<TextView>(R.id.detailUsername)
-        val description = view.findViewById<TextView>(R.id.detailDescription)
+        descriptionText = view.findViewById(R.id.detailDescription)
         val detailImage = view.findViewById<ImageView>(R.id.detailImage)
         likeButton = view.findViewById(R.id.detailLikeButton)
         likeCountText = view.findViewById(R.id.detailLikeCount)
+        val editButton = view.findViewById<Button>(R.id.detailEditButton)
         val commentsRecyclerView = view.findViewById<RecyclerView>(R.id.detailCommentsRecyclerView)
         val commentInput = view.findViewById<EditText>(R.id.detailCommentInput)
         val addCommentButton = view.findViewById<Button>(R.id.detailAddCommentButton)
-        val closeButton = view.findViewById<Button>(R.id.detailCloseButton)
+        val closeButton = view.findViewById<android.widget.ImageButton>(R.id.detailCloseButton)
 
         username.text = post.username ?: "Unknown User"
-        description.text = post.description ?: ""
+        descriptionText.text = post.description ?: ""
+
+        username.setOnClickListener {
+            val userId = post.userId ?: return@setOnClickListener
+            dismiss()
+            requireActivity().supportFragmentManager.beginTransaction()
+                .replace(R.id.flFragment, ProfileFragment.newInstance(userId))
+                .addToBackStack(null)
+                .commit()
+        }
+
+        // Show edit button if this is the current user's post
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val currentUser = withContext(Dispatchers.IO) { userRepository.getUser() }
+                if (currentUser.userID == post.userId) {
+                    editButton.visibility = View.VISIBLE
+                }
+            } catch (e: Exception) {
+                // If we can't fetch user, just leave the edit button hidden
+            }
+        }
+
+        editButton.setOnClickListener {
+            val postId = post.postID ?: return@setOnClickListener
+            val editFragment = EditPostFragment.newInstance(
+                postId = postId,
+                currentDescription = descriptionText.text.toString(),
+                imageIds = post.imageIds,
+                onEdited = { updatedDescription ->
+                    descriptionText.text = updatedDescription
+                },
+                onDeleted = {
+                    dismiss()
+                }
+            )
+            editFragment.show(parentFragmentManager, "EditPostFragment")
+        }
         
         // Load image if available
         if (!post.imageIds.isNullOrEmpty()) {

@@ -21,6 +21,15 @@ object HttpRoutes {
     val FOLLOWER_COUNT = "$BASE_URL/user/followercxount"
     val UPDATE_USER = "$BASE_URL/user/update"
     val DELETE_USER = "$BASE_URL/user/delete"
+    val FOLLOW_USER = "$BASE_URL/user/follow"
+    val UNFOLLOW_USER = "$BASE_URL/user/unfollow"
+    val IS_FOLLOWING = "$BASE_URL/user/isfollowing"
+    val GET_FOLLOWERS = "$BASE_URL/user/allfollowers"
+    val GET_FOLLOWING = "$BASE_URL/user/allfollowing"
+    val REMOVE_FOLLOWER = "$BASE_URL/user/removefollower"
+    val BLOCK_USER = "$BASE_URL/user/block"
+    val UNBLOCK_USER = "$BASE_URL/user/unblock"
+    val IS_BLOCKED = "$BASE_URL/user/isblocked"
 
     // Posts
     val CREATE_POST = "$BASE_URL/post/create"
@@ -32,6 +41,8 @@ object HttpRoutes {
     val CREATE_COMMENT = "$BASE_URL/post/comment/create"
     val GET_LIKES = "$BASE_URL/post/likes"
     val GET_PROFILE_POSTS = "$BASE_URL/post/profileposts"
+    val EDIT_POST = "$BASE_URL/post/edit"
+    val DELETE_POST = "$BASE_URL/post/delete"
 
     // Images
     val GET_IMAGE = "$BASE_URL/image"
