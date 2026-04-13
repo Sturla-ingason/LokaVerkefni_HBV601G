@@ -12,35 +12,35 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import main.app.R
+import main.app.ViewModel.HomeViewModel
+import main.app.ViewModel.PostDetailViewModel
 import main.app.adapters.CommentAdapter
 import main.app.adapters.UserAdapter
 import main.app.apiConnections.HttpRoutes
 import main.app.dataModel.Post
-import main.app.repository.CommentRepository
-import main.app.repository.PostRepository
-import main.app.repository.UserRepository
+import main.app.dataModel.User
 
 class PostDetailFragment : DialogFragment() {
 
     private lateinit var post: Post
-    private val postRepository = PostRepository()
-    private val commentRepository = CommentRepository()
-    private val userRepository = UserRepository()
+    private val viewModel: PostDetailViewModel by viewModels()
+    private val homeViewModel: HomeViewModel by activityViewModels()
     private lateinit var commentAdapter: CommentAdapter
 
     private lateinit var likeButton: Button
     private lateinit var likeCountText: TextView
     private lateinit var descriptionText: TextView
-    private var isLiked: Boolean = false
-    private var currentLikeCount: Int = 0
+    private lateinit var editButton: Button
+    private lateinit var commentsRecyclerView: RecyclerView
+    private lateinit var commentInput: EditText
 
     companion object {
         fun newInstance(post: Post): PostDetailFragment {
@@ -55,8 +55,6 @@ class PostDetailFragment : DialogFragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         post = arguments?.getSerializable("post") as Post
-        isLiked = post.likedByCurrentUser ?: false
-        currentLikeCount = post.likeCount ?: 0
     }
 
     override fun onCreateView(
@@ -75,9 +73,9 @@ class PostDetailFragment : DialogFragment() {
         val detailImage = view.findViewById<ImageView>(R.id.detailImage)
         likeButton = view.findViewById(R.id.detailLikeButton)
         likeCountText = view.findViewById(R.id.detailLikeCount)
-        val editButton = view.findViewById<Button>(R.id.detailEditButton)
-        val commentsRecyclerView = view.findViewById<RecyclerView>(R.id.detailCommentsRecyclerView)
-        val commentInput = view.findViewById<EditText>(R.id.detailCommentInput)
+        editButton = view.findViewById(R.id.detailEditButton)
+        commentsRecyclerView = view.findViewById(R.id.detailCommentsRecyclerView)
+        commentInput = view.findViewById(R.id.detailCommentInput)
         val addCommentButton = view.findViewById<Button>(R.id.detailAddCommentButton)
         val closeButton = view.findViewById<android.widget.ImageButton>(R.id.detailCloseButton)
 
@@ -93,35 +91,19 @@ class PostDetailFragment : DialogFragment() {
                 .commit()
         }
 
-        // Show edit button if this is the current user's post
-        viewLifecycleOwner.lifecycleScope.launch {
-            try {
-                val currentUser = withContext(Dispatchers.IO) { userRepository.getUser() }
-                if (currentUser.userID == post.userId) {
-                    editButton.visibility = View.VISIBLE
-                }
-            } catch (e: Exception) {
-                // If we can't fetch user, just leave the edit button hidden
-            }
-        }
-
         editButton.setOnClickListener {
             val postId = post.postID ?: return@setOnClickListener
-            val editFragment = EditPostFragment.newInstance(
+            EditPostFragment.newInstance(
                 postId = postId,
                 currentDescription = descriptionText.text.toString(),
                 imageIds = post.imageIds,
-                onEdited = { updatedDescription ->
-                    descriptionText.text = updatedDescription
-                },
+                onEdited = { updatedDescription -> descriptionText.text = updatedDescription },
                 onDeleted = {
-                    dismiss()
-                }
-            )
-            editFragment.show(parentFragmentManager, "EditPostFragment")
+                    (parentFragment as? ProfileFragment)?.refreshPosts()
+                    dismiss() }
+            ).show(parentFragmentManager, "EditPostFragment")
         }
-        
-        // Load image if available
+
         if (!post.imageIds.isNullOrEmpty()) {
             detailImage.visibility = View.VISIBLE
             val imageUrl = "${HttpRoutes.GET_IMAGE}/${post.imageIds!![0]}"
@@ -133,116 +115,95 @@ class PostDetailFragment : DialogFragment() {
             detailImage.visibility = View.GONE
         }
 
-        updateLikeUI()
-
-        // Like Button Logic
-        likeButton.setOnClickListener {
-            val postId = post.postID ?: return@setOnClickListener
-            viewLifecycleOwner.lifecycleScope.launch {
-                try {
-                    if (isLiked) {
-                        postRepository.unlikePost(postId)
-                        isLiked = false
-                        currentLikeCount--
-                    } else {
-                        postRepository.likePost(postId)
-                        isLiked = true
-                        currentLikeCount++
-                    }
-                    updateLikeUI()
-                } catch (e: Exception) {
-                    Toast.makeText(context, "Failed to update like", Toast.LENGTH_SHORT).show()
-                }
-            }
-        }
-
-        // Like Count Click Logic - Show list of users who liked
-        likeCountText.setOnClickListener {
-            showLikesDialog()
-        }
-
-        // Comments RecyclerView
-        commentAdapter = CommentAdapter(post.comments ?: emptyList())
+        commentAdapter = CommentAdapter(emptyList())
         commentsRecyclerView.layoutManager = LinearLayoutManager(context)
         commentsRecyclerView.adapter = commentAdapter
 
-        // Add Comment Logic
+        likeButton.setOnClickListener {
+            val postId = post.postID ?: return@setOnClickListener
+            homeViewModel.toggleLike(postId)
+        }
+
+        likeCountText.setOnClickListener {
+            val postId = post.postID ?: return@setOnClickListener
+            viewModel.loadLikes(postId)
+        }
+
         addCommentButton.setOnClickListener {
             val text = commentInput.text.toString().trim()
-            if (text.isEmpty()) return@setOnClickListener
-
             val postId = post.postID ?: return@setOnClickListener
-            viewLifecycleOwner.lifecycleScope.launch {
-                try {
-                    withContext(Dispatchers.IO) {
-                        commentRepository.createComment(postId, text)
-                    }
-                    val updatedComments = withContext(Dispatchers.IO) {
-                        commentRepository.getComments(postId)
-                    }
-                    commentAdapter.updateData(updatedComments)
-                    commentInput.text.clear()
-                    commentsRecyclerView.scrollToPosition(commentAdapter.itemCount - 1)
-                } catch (e: Exception) {
-                    Toast.makeText(context, "Failed to post comment", Toast.LENGTH_SHORT).show()
-                }
-            }
+            if (text.isEmpty()) return@setOnClickListener
+            viewModel.addComment(postId, text)
         }
 
         closeButton.setOnClickListener { dismiss() }
-        
-        refreshComments()
-    }
 
-    private fun showLikesDialog() {
-        val postId = post.postID ?: return
-        
+        // Observe like state from the shared HomeViewModel (single source of truth)
         viewLifecycleOwner.lifecycleScope.launch {
-            try {
-                val likedUsers = withContext(Dispatchers.IO) {
-                    postRepository.getLikes(postId)
-                }
-                
-                if (likedUsers.isEmpty()) {
-                    Toast.makeText(context, "No likes yet", Toast.LENGTH_SHORT).show()
-                    return@launch
-                }
-
-                val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_likes_list, null)
-                val recyclerView = dialogView.findViewById<RecyclerView>(R.id.likesRecyclerView)
-                recyclerView.layoutManager = LinearLayoutManager(context)
-                
-                AlertDialog.Builder(requireContext())
-                    .setView(dialogView)
-                    .setNegativeButton("Close", null)
-                    .show()
-
-                // Pass an empty listener to UserAdapter to remove navigation
-                val adapter = UserAdapter(likedUsers) { }
-                recyclerView.adapter = adapter
-                
-            } catch (e: Exception) {
-                Toast.makeText(context, "Failed to load likes", Toast.LENGTH_SHORT).show()
+            homeViewModel.posts.collect { posts ->
+                val current = posts.find { it.postID == post.postID } ?: return@collect
+                likeButton.text = if (current.likedByCurrentUser == true) "Unlike" else "Like"
+                likeCountText.text = "${current.likeCount ?: 0} Likes"
             }
         }
-    }
 
-    private fun refreshComments() {
-        val postId = post.postID ?: return
+        // Observe edit button visibility
         viewLifecycleOwner.lifecycleScope.launch {
-            try {
-                val freshComments = withContext(Dispatchers.IO) {
-                    commentRepository.getComments(postId)
-                }
-                commentAdapter.updateData(freshComments)
-            } catch (e: Exception) {
+            viewModel.showEditButton.collect { show ->
+                editButton.visibility = if (show) View.VISIBLE else View.GONE
             }
         }
+
+        // Observe comments list
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.comments.collect { comments ->
+                commentAdapter.updateData(comments)
+            }
+        }
+
+        // Observe liked users and show dialog
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.likedUsers.collect { users ->
+                showLikesDialog(users)
+            }
+        }
+
+        // Observe comment added to clear input and scroll
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.commentAdded.collect {
+                commentInput.text.clear()
+                commentsRecyclerView.scrollToPosition(commentAdapter.itemCount - 1)
+            }
+        }
+
+        // Observe errors
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.error.collect { message ->
+                Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        // Initial data loads
+        viewModel.checkEditButton(post.userId)
+        post.postID?.let { viewModel.loadComments(it) }
     }
 
-    private fun updateLikeUI() {
-        likeButton.text = if (isLiked) "Unlike" else "Like"
-        likeCountText.text = "$currentLikeCount Likes"
+    private fun showLikesDialog(likedUsers: List<User>) {
+        if (likedUsers.isEmpty()) {
+            Toast.makeText(context, "No likes yet", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_likes_list, null)
+        val recyclerView = dialogView.findViewById<RecyclerView>(R.id.likesRecyclerView)
+        recyclerView.layoutManager = LinearLayoutManager(context)
+
+        AlertDialog.Builder(requireContext())
+            .setView(dialogView)
+            .setNegativeButton("Close", null)
+            .show()
+
+        recyclerView.adapter = UserAdapter(likedUsers) { }
     }
 
     override fun onStart() {

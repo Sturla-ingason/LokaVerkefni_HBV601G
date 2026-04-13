@@ -9,12 +9,15 @@ import android.widget.EditText
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.coroutines.launch
 import main.app.R
-import main.app.repository.PostRepository
-import androidx.core.net.toUri
+import main.app.ViewModel.CreatePostState
+import main.app.ViewModel.CreatePostViewModel
 
 class CreatePostFragment : Fragment(R.layout.fragment_create_post) {
     companion object {
@@ -23,7 +26,7 @@ class CreatePostFragment : Fragment(R.layout.fragment_create_post) {
     }
 
     private var selectedPhotoUri: Uri? = null
-    private val postRepository = PostRepository()
+    private val viewModel: CreatePostViewModel by viewModels()
 
     private val pickImage = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         uri?.let {
@@ -44,9 +47,10 @@ class CreatePostFragment : Fragment(R.layout.fragment_create_post) {
         val postButton = view.findViewById<Button>(R.id.postButton)
         val postText = view.findViewById<EditText>(R.id.postText)
 
+        // Reset state when the view is created so old success/error doesn't re-trigger
+        viewModel.resetState()
 
-        //listener for taking a picture. When the picture has been taken this listener will fier and show
-        //the picture in the preview
+        // Listener for taking a picture via CameraFragment
         parentFragmentManager.setFragmentResultListener(REQ_KEY, viewLifecycleOwner) { _, bundle ->
             val uriString = bundle.getString(BUNDLE_URI) ?: return@setFragmentResultListener
             val uri = uriString.toUri()
@@ -56,38 +60,43 @@ class CreatePostFragment : Fragment(R.layout.fragment_create_post) {
 
         addPhotoButton.setOnClickListener { showPhotoDialog() }
 
-
-        //onclick Listener for the post button
         postButton.setOnClickListener {
-
             val description = postText.text.toString()
             if (description.isBlank() && selectedPhotoUri == null) {
                 Toast.makeText(requireContext(), "Please add a description or a photo", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
-            viewLifecycleOwner.lifecycleScope.launch {
-                try {
-                    var imageBytes: ByteArray? = null
-                    var mimeType: String? = null
-                    
-                    selectedPhotoUri?.let { uri ->
-                        val inputStream = requireContext().contentResolver.openInputStream(uri)
-                        imageBytes = inputStream?.readBytes()
-                        inputStream?.close()
-                        mimeType = requireContext().contentResolver.getType(uri)
-                    }
+            // Read image bytes here since we need contentResolver from the fragment
+            var imageBytes: ByteArray? = null
+            var mimeType: String? = null
+            selectedPhotoUri?.let { uri ->
+                val inputStream = requireContext().contentResolver.openInputStream(uri)
+                imageBytes = inputStream?.readBytes()
+                inputStream?.close()
+                mimeType = requireContext().contentResolver.getType(uri)
+            }
 
-                    postRepository.createPost(description, imageBytes, mimeType)
-                    
-                    Toast.makeText(requireContext(), "Post created!", Toast.LENGTH_SHORT).show()
-                    
-                    parentFragmentManager.beginTransaction()
-                        .replace(R.id.flFragment, HomePage())
-                        .commit()
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    Toast.makeText(requireContext(), "Failed to create post", Toast.LENGTH_SHORT).show()
+            viewModel.createPost(description, imageBytes, mimeType)
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.state.collect { state ->
+                when (state) {
+                    is CreatePostState.Loading -> postButton.isEnabled = false
+                    is CreatePostState.Success -> {
+                        Toast.makeText(requireContext(), "Post created!", Toast.LENGTH_SHORT).show()
+                        viewModel.resetState()
+                        // Switch to profile tab so the user sees their new post
+                        requireActivity()
+                            .findViewById<BottomNavigationView>(R.id.bottomNavigationView)
+                            .selectedItemId = R.id.profile
+                    }
+                    is CreatePostState.Error -> {
+                        Toast.makeText(requireContext(), state.message, Toast.LENGTH_SHORT).show()
+                        postButton.isEnabled = true
+                    }
+                    is CreatePostState.Idle -> postButton.isEnabled = true
                 }
             }
         }

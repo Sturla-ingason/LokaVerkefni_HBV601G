@@ -5,19 +5,19 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.launch
 import main.app.R
+import main.app.ViewModel.HomeViewModel
 import main.app.adapters.Adapter
-import main.app.repository.PostRepository
 
 class HomePage : Fragment() {
 
-    private val postRepository = PostRepository()
+    private val viewModel: HomeViewModel by activityViewModels()
     private lateinit var adapter: Adapter
-
 
 
     /**
@@ -38,27 +38,22 @@ class HomePage : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        adapter = Adapter(emptyList(), viewLifecycleOwner.lifecycleScope, childFragmentManager)
+        adapter = Adapter(
+            emptyList(),
+            viewLifecycleOwner.lifecycleScope,
+            childFragmentManager,
+            onLikeToggle = { postId -> viewModel.toggleLike(postId) }
+        )
         val recyclerView: RecyclerView = view.findViewById(R.id.recycleView)
         recyclerView.layoutManager = LinearLayoutManager(context)
         recyclerView.adapter = adapter
 
-        fetchPosts()
-    }
-
-
-    /**
-     *  Fetches all the posts that are supposed to be on the users homepage.
-     */
-    private fun fetchPosts() {
         viewLifecycleOwner.lifecycleScope.launch {
-            try {
-                val posts = postRepository.getPosts()
+            viewModel.posts.collect { posts ->
                 adapter.updateData(posts)
-            } catch (e: Exception) {
-                // Handle error (e.g., show a Toast or an error message in the UI)
-                e.printStackTrace()
             }
         }
+
+        viewModel.loadPosts()
     }
 }

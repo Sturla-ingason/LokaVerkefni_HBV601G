@@ -7,18 +7,20 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
 import main.app.R
+import main.app.ViewModel.AuthState
+import main.app.ViewModel.AuthViewModel
 import main.app.databinding.FragmentLoginnBinding
-import main.app.serviceModel.AuthModel
 
 class LoginFragment : Fragment() {
 
     private var _binding: FragmentLoginnBinding? = null
     private val binding get() = _binding!!
 
-    private val authModel = AuthModel()
+    private val authViewModel: AuthViewModel by viewModels()
 
 
     /**
@@ -56,19 +58,23 @@ class LoginFragment : Fragment() {
                 return@setOnClickListener
             }
 
-            // Show loading or disable button
-            binding.LogInnButton.isEnabled = false
+            authViewModel.login(email, password)
+        }
 
-            viewLifecycleOwner.lifecycleScope.launch {
-                val success = authModel.logInn(email, password)
-                
-                if (success) {
-                    val intent = Intent(requireContext(), AuthActivity::class.java)
-                    startActivity(intent)
-                    requireActivity().finish()
-                } else {
-                    Toast.makeText(requireContext(), "Login failed. Please check your credentials.", Toast.LENGTH_SHORT).show()
-                    binding.LogInnButton.isEnabled = true
+        viewLifecycleOwner.lifecycleScope.launch {
+            authViewModel.loginState.collect { state ->
+                when (state) {
+                    is AuthState.Loading -> binding.LogInnButton.isEnabled = false
+                    is AuthState.Success -> {
+                        val intent = Intent(requireContext(), AuthActivity::class.java)
+                        startActivity(intent)
+                        requireActivity().finish()
+                    }
+                    is AuthState.Error -> {
+                        Toast.makeText(requireContext(), state.message, Toast.LENGTH_SHORT).show()
+                        binding.LogInnButton.isEnabled = true
+                    }
+                    is AuthState.Idle -> binding.LogInnButton.isEnabled = true
                 }
             }
         }
