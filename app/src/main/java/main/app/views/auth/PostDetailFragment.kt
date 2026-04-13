@@ -12,7 +12,6 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.DialogFragment
-import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -20,7 +19,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import kotlinx.coroutines.launch
 import main.app.R
-import main.app.ViewModel.HomeViewModel
 import main.app.ViewModel.PostDetailViewModel
 import main.app.adapters.CommentAdapter
 import main.app.adapters.UserAdapter
@@ -32,7 +30,6 @@ class PostDetailFragment : DialogFragment() {
 
     private lateinit var post: Post
     private val viewModel: PostDetailViewModel by viewModels()
-    private val homeViewModel: HomeViewModel by activityViewModels()
     private lateinit var commentAdapter: CommentAdapter
 
     private lateinit var likeButton: Button
@@ -115,13 +112,13 @@ class PostDetailFragment : DialogFragment() {
             detailImage.visibility = View.GONE
         }
 
-        commentAdapter = CommentAdapter(emptyList())
+        commentAdapter = CommentAdapter(post.comments ?: emptyList())
         commentsRecyclerView.layoutManager = LinearLayoutManager(context)
         commentsRecyclerView.adapter = commentAdapter
 
         likeButton.setOnClickListener {
             val postId = post.postID ?: return@setOnClickListener
-            homeViewModel.toggleLike(postId)
+            viewModel.toggleLike(postId)
         }
 
         likeCountText.setOnClickListener {
@@ -138,12 +135,26 @@ class PostDetailFragment : DialogFragment() {
 
         closeButton.setOnClickListener { dismiss() }
 
-        // Observe like state from the shared HomeViewModel (single source of truth)
+        // Seed comments from the post object so they show immediately before the network call returns
+        if (!post.comments.isNullOrEmpty()) {
+            viewModel.initComments(post.comments!!)
+        }
+
+        // Initialise like state from the post object so it works from any screen
+        viewModel.initLikeState(
+            liked = post.likedByCurrentUser ?: false,
+            count = post.likeCount ?: 0
+        )
+
         viewLifecycleOwner.lifecycleScope.launch {
-            homeViewModel.posts.collect { posts ->
-                val current = posts.find { it.postID == post.postID } ?: return@collect
-                likeButton.text = if (current.likedByCurrentUser == true) "Unlike" else "Like"
-                likeCountText.text = "${current.likeCount ?: 0} Likes"
+            viewModel.isLiked.collect { liked ->
+                likeButton.text = if (liked) "Unlike" else "Like"
+            }
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.likeCount.collect { count ->
+                likeCountText.text = "$count Likes"
             }
         }
 
@@ -204,6 +215,11 @@ class PostDetailFragment : DialogFragment() {
             .show()
 
         recyclerView.adapter = UserAdapter(likedUsers) { }
+    }
+
+    override fun onDismiss(dialog: android.content.DialogInterface) {
+        super.onDismiss(dialog)
+        parentFragmentManager.setFragmentResult("post_detail_dismissed", Bundle())
     }
 
     override fun onStart() {

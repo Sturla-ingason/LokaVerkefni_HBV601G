@@ -108,18 +108,12 @@ class ProfileFragment : Fragment() {
             }
         }
 
-        // Observe follow/block state
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.isFollowing.collect { isFollowing ->
-                binding.followButton.text = if (isFollowing) "Unfollow" else "Follow"
-            }
+        childFragmentManager.setFragmentResultListener("post_detail_dismissed", viewLifecycleOwner) { _, _ ->
+            viewModel.loadPosts(targetUserId)
         }
 
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.isBlocked.collect { isBlocked ->
-                binding.blockButton.text = if (isBlocked) "Unblock" else "Block"
-                binding.followButton.visibility = if (isBlocked) View.GONE else View.VISIBLE
-            }
+        parentFragmentManager.setFragmentResultListener("follow_list_dismissed", viewLifecycleOwner) { _, _ ->
+            viewModel.loadProfileData(targetUserId)
         }
 
         // Observe errors
@@ -161,6 +155,20 @@ class ProfileFragment : Fragment() {
                     .setPositiveButton(action) { _, _ -> viewModel.toggleBlock(targetUserId!!) }
                     .setNegativeButton("Cancel", null)
                     .show()
+            }
+
+            // Only observe follow/block state when viewing another user's profile
+            viewLifecycleOwner.lifecycleScope.launch {
+                viewModel.isFollowing.collect { isFollowing ->
+                    binding.followButton.text = if (isFollowing) "Unfollow" else "Follow"
+                }
+            }
+
+            viewLifecycleOwner.lifecycleScope.launch {
+                viewModel.isBlocked.collect { isBlocked ->
+                    binding.blockButton.text = if (isBlocked) "Unblock" else "Block"
+                    binding.followButton.visibility = if (isBlocked) View.GONE else View.VISIBLE
+                }
             }
 
             viewModel.loadFollowBlockState(targetUserId!!)

@@ -54,6 +54,10 @@ class HomePage : Fragment() {
             }
         }
 
+        childFragmentManager.setFragmentResultListener("post_detail_dismissed", viewLifecycleOwner) { _, _ ->
+            viewModel.loadPosts()
+        }
+
         viewModel.loadPosts()
     }
 }
