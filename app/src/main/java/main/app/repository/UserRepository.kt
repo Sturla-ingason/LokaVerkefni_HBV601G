@@ -58,6 +58,24 @@ class UserRepository {
         }
     }
 
+    suspend fun getFollowers(userId: Int): List<User> {
+        return KtorClient.httpClient.get(HttpRoutes.GET_FOLLOWERS) {
+            parameter("userId", userId)
+        }.body()
+    }
+
+    suspend fun getFollowing(userId: Int): List<User> {
+        return KtorClient.httpClient.get(HttpRoutes.GET_FOLLOWING) {
+            parameter("userId", userId)
+        }.body()
+    }
+
+    suspend fun removeFollower(userId: Int) {
+        KtorClient.httpClient.patch(HttpRoutes.REMOVE_FOLLOWER) {
+            parameter("userID", userId)
+        }
+    }
+
     suspend fun followUser(userId: Int) {
         KtorClient.httpClient.patch(HttpRoutes.FOLLOW_USER) {
             parameter("userID", userId)

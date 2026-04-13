@@ -30,6 +30,7 @@ class ProfileFragment : Fragment() {
     private val postRepository = PostRepository()
     private val userRepository = UserRepository()
     private lateinit var adapter: Adapter
+    private var resolvedUserId: Int? = null
 
     companion object {
         fun newInstance(userId: Int? = null): ProfileFragment {
@@ -165,6 +166,20 @@ class ProfileFragment : Fragment() {
                 if (!user.bio.isNullOrBlank()) {
                     binding.bio.text = user.bio
                     binding.bio.visibility = android.view.View.VISIBLE
+                }
+
+                // Store the resolved user ID and wire up follower/following clicks
+                resolvedUserId = user.userID
+                user.userID?.let { uid ->
+                    val isOwnProfile = userId == null
+                    binding.followersCount.setOnClickListener {
+                        FollowListFragment.newInstance(uid, FollowListFragment.MODE_FOLLOWERS, isOwnProfile)
+                            .show(parentFragmentManager, "FollowListFragment")
+                    }
+                    binding.followingCount.setOnClickListener {
+                        FollowListFragment.newInstance(uid, FollowListFragment.MODE_FOLLOWING, isOwnProfile)
+                            .show(parentFragmentManager, "FollowListFragment")
+                    }
                 }
 
             } catch (e: Exception) {
