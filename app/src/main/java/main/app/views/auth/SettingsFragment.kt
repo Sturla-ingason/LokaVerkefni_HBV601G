@@ -1,13 +1,20 @@
 package main.app.views.auth
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
+import com.bumptech.glide.Glide
+import kotlinx.coroutines.launch
+import main.app.MainActivity
+import main.app.apiConnections.HttpRoutes
 import androidx.fragment.app.viewModels
 import main.app.MainActivity
 import main.app.R
@@ -23,6 +30,22 @@ class SettingsFragment : Fragment() {
     private var _binding: FragmentSettingsBinding? = null
     private val binding get() = _binding!!
     private val viewModel: SettingsViewModel by viewModels()
+
+
+    private var originalUsername: String = ""
+    private var originalEmail: String = ""
+    private var originalBio: String = ""
+    private var selectedImageUri: Uri? = null
+
+
+    private val pickProfileImage =
+        registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+            uri ?: return@registerForActivityResult
+            selectedImageUri = uri
+            binding.settingsProfileImage.setImageURI(uri)
+            binding.settingsPasswordInput.setText("")
+        }
+
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -43,10 +66,12 @@ class SettingsFragment : Fragment() {
             binding.settingsBioInput.setText(user.bio ?: "")
         }
 
-        viewModel.loadError.observe(viewLifecycleOwner) { error ->
-            error ?: return@observe
-            viewModel.clearLoadError()
-            Toast.makeText(requireContext(), "Failed to load profile data", Toast.LENGTH_SHORT).show()
+        binding.changeProfilePictureButton.setOnClickListener {
+            pickProfileImage.launch("image/*")
+        }
+
+        binding.saveSettingsButton.setOnClickListener {
+            saveSettings()
         }
 
         viewModel.updateResult.observe(viewLifecycleOwner) { success ->
@@ -66,14 +91,37 @@ class SettingsFragment : Fragment() {
             navigateToLogin()
         }
 
-        viewModel.deleteResult.observe(viewLifecycleOwner) { success ->
-            success ?: return@observe
-            viewModel.clearDeleteResult()
-            if (success) {
-                Toast.makeText(requireContext(), "Account deleted", Toast.LENGTH_SHORT).show()
-                navigateToLogin()
-            } else {
-                Toast.makeText(requireContext(), "Delete failed. Please try again.", Toast.LENGTH_SHORT).show()
+    /**
+     * Fetches current user data and populates the form fields.
+     */
+    private fun loadUserData() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val user = userRepository.getUser()
+                currentUserId = user.userID
+
+                originalUsername = user.username ?: ""
+                originalEmail = user.email ?: ""
+                originalBio = user.bio ?: ""
+
+                binding.settingsUsernameInput.setText(originalUsername)
+                binding.settingsEmailInput.setText(originalEmail)
+                binding.settingsBioInput.setText(originalBio)
+                binding.settingsPasswordInput.setText("")
+
+                if (user.imageId != null && user.imageId != 0) {
+                    val imageUrl = "${HttpRoutes.GET_IMAGE}/${user.imageId}"
+                    Glide.with(this@SettingsFragment)
+                        .load(imageUrl)
+                        .placeholder(android.R.drawable.ic_menu_gallery)
+                        .into(binding.settingsProfileImage)
+                } else {
+                    binding.settingsProfileImage.setImageResource(android.R.drawable.ic_menu_gallery)
+                }
+
+            } catch (e: Exception) {
+                e.printStackTrace()
+                Toast.makeText(requireContext(), "Failed to load profile data", Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -83,15 +131,72 @@ class SettingsFragment : Fragment() {
             parentFragmentManager.popBackStack()
         }
 
-        binding.saveSettingsButton.setOnClickListener {
-            val username = binding.settingsUsernameInput.text.toString().trim()
-            val email = binding.settingsEmailInput.text.toString().trim()
-            val password = binding.settingsPasswordInput.text.toString().trim()
-            val bio = binding.settingsBioInput.text.toString().trim()
+        val textChanged =
+            username != originalUsername ||
+                    email != originalEmail ||
+                    bio != originalBio ||
+                    password.isNotEmpty()
 
-            if (username.isEmpty() || email.isEmpty()) {
-                Toast.makeText(requireContext(), "Username and email cannot be empty", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
+        val pictureChanged = selectedImageUri != null
+
+        if (!textChanged && !pictureChanged) {
+            Toast.makeText(requireContext(), "No changes to save", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                var profileSuccess = true
+                var pictureSuccess = true
+
+                if (textChanged) {
+                    profileSuccess = userRepository.updateUser(
+                        username = username,
+                        email = email,
+                        password = password,
+                        bio = bio
+                    )
+                }
+
+                if (pictureChanged) {
+                    val uri = selectedImageUri!!
+                    val imageBytes = requireContext().contentResolver
+                        .openInputStream(uri)
+                        ?.use { it.readBytes() }
+
+                    val mimeType = requireContext().contentResolver.getType(uri) ?: "image/jpeg"
+
+                    pictureSuccess = if (imageBytes != null) {
+                        userRepository.updateProfilePicture(imageBytes, mimeType)
+                    } else {
+                        false
+                    }
+                }
+
+                when {
+                    !profileSuccess -> {
+                        Toast.makeText(requireContext(), "Profile text update failed", Toast.LENGTH_SHORT).show()
+                    }
+                    !pictureSuccess -> {
+                        Toast.makeText(requireContext(), "Profile picture update failed", Toast.LENGTH_SHORT).show()
+                    }
+                    else -> {
+                        Toast.makeText(requireContext(), "Profile updated!", Toast.LENGTH_SHORT).show()
+
+                        originalUsername = username
+                        originalEmail = email
+                        originalBio = bio
+
+                        binding.settingsPasswordInput.setText("")
+                        selectedImageUri = null
+
+                        parentFragmentManager.popBackStack()
+                    }
+                }
+
+            } catch (e: Exception) {
+                e.printStackTrace()
+                Toast.makeText(requireContext(), "Update failed. Please try again.", Toast.LENGTH_SHORT).show()
             }
             viewModel.saveSettings(username, email, password, bio)
         }

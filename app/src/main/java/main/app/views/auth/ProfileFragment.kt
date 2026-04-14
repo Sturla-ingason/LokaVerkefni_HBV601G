@@ -11,10 +11,12 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import kotlinx.coroutines.launch
 import main.app.R
 import main.app.ViewModel.ProfileViewModel
 import main.app.adapters.Adapter
+import main.app.apiConnections.HttpRoutes
 import main.app.databinding.FragmentProfileBinding
 
 
@@ -104,6 +106,16 @@ class ProfileFragment : Fragment() {
                         FollowListFragment.newInstance(uid, FollowListFragment.MODE_FOLLOWING, isOwnProfile)
                             .show(parentFragmentManager, "FollowListFragment")
                     }
+                }
+
+                if (user.imageId != null) {
+                    val imageUrl = "${HttpRoutes.GET_IMAGE}/${user.imageId}"
+                    Glide.with(this@ProfileFragment)
+                        .load(imageUrl)
+                        .placeholder(android.R.drawable.ic_menu_gallery)
+                        .into(binding.profileImage)
+                } else {
+                    binding.profileImage.setImageResource(android.R.drawable.ic_menu_gallery)
                 }
             }
         }
