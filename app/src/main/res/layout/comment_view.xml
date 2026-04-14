@@ -28,26 +28,41 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="15dp"
-            android:orientation="vertical">
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
 
-            <!--TextView for displaying Name -->
-            <TextView
-                android:id="@+id/userNameCommenter"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="@android:color/black"
-                android:textSize="20sp"
-                tools:text="Name" />
-
-            <!--TextView for displaying Email -->
-            <TextView
-                android:id="@+id/comment"
-                android:layout_width="match_parent"
+            <LinearLayout
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:textColor="#454545"
-                android:textSize="16sp"
-                tools:text="Email" />
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/userNameCommenter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@android:color/black"
+                    android:textSize="20sp"
+                    tools:text="Name" />
+
+                <TextView
+                    android:id="@+id/comment"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textColor="#454545"
+                    android:textSize="16sp"
+                    tools:text="Comment" />
+
+            </LinearLayout>
+
+            <ImageButton
+                android:id="@+id/deleteCommentButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@android:drawable/ic_menu_delete"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Delete comment"
+                android:visibility="gone"/>
 
         </LinearLayout>
 

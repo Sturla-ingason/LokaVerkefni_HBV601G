@@ -90,6 +90,7 @@ class ProfileViewModel : ViewModel() {
                 if (_isFollowing.value) userRepository.unfollowUser(userId)
                 else userRepository.followUser(userId)
                 _isFollowing.value = !_isFollowing.value
+                loadProfileData(userId)
             } catch (e: Exception) {
                 _error.emit("Failed to update follow")
             }

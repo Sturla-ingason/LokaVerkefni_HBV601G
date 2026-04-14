@@ -15,9 +15,11 @@ import com.bumptech.glide.Glide
 import kotlinx.coroutines.launch
 import main.app.MainActivity
 import main.app.apiConnections.HttpRoutes
+import androidx.fragment.app.viewModels
+import main.app.MainActivity
+import main.app.R
+import main.app.ViewModel.SettingsViewModel
 import main.app.databinding.FragmentSettingsBinding
-import main.app.repository.AuthRepository
-import main.app.repository.UserRepository
 
 /**
  * Settings fragment that allows the user to edit their profile,
@@ -27,11 +29,7 @@ class SettingsFragment : Fragment() {
 
     private var _binding: FragmentSettingsBinding? = null
     private val binding get() = _binding!!
-    private val userRepository = UserRepository()
-    private val authRepository = AuthRepository()
-
-    // Stores the current user ID so we can check it on delete
-    private var currentUserId: Int? = null
+    private val viewModel: SettingsViewModel by viewModels()
 
 
     private var originalUsername: String = ""
@@ -61,10 +59,11 @@ class SettingsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        loadUserData()
-
-        binding.backButton.setOnClickListener {
-            parentFragmentManager.popBackStack()
+        viewModel.user.observe(viewLifecycleOwner) { user ->
+            user ?: return@observe
+            binding.settingsUsernameInput.setText(user.username ?: "")
+            binding.settingsEmailInput.setText(user.email ?: "")
+            binding.settingsBioInput.setText(user.bio ?: "")
         }
 
         binding.changeProfilePictureButton.setOnClickListener {
@@ -75,14 +74,22 @@ class SettingsFragment : Fragment() {
             saveSettings()
         }
 
-        binding.logoutButton.setOnClickListener {
-            logout()
+        viewModel.updateResult.observe(viewLifecycleOwner) { success ->
+            success ?: return@observe
+            viewModel.clearUpdateResult()
+            if (success) {
+                Toast.makeText(requireContext(), "Profile updated!", Toast.LENGTH_SHORT).show()
+                parentFragmentManager.popBackStack()
+            } else {
+                Toast.makeText(requireContext(), "Update failed. Please try again.", Toast.LENGTH_SHORT).show()
+            }
         }
 
-        binding.deleteAccountButton.setOnClickListener {
-            deleteAccount()
+        viewModel.logoutComplete.observe(viewLifecycleOwner) { done ->
+            done ?: return@observe
+            viewModel.clearLogoutComplete()
+            navigateToLogin()
         }
-    }
 
     /**
      * Fetches current user data and populates the form fields.
@@ -117,21 +124,11 @@ class SettingsFragment : Fragment() {
                 Toast.makeText(requireContext(), "Failed to load profile data", Toast.LENGTH_SHORT).show()
             }
         }
-    }
 
-    /**
-     * Validates input and sends updated profile to the API.
-     * Password is only sent if the user typed a new one.
-     */
-    private fun saveSettings() {
-        val username = binding.settingsUsernameInput.text.toString().trim()
-        val email = binding.settingsEmailInput.text.toString().trim()
-        val password = binding.settingsPasswordInput.text.toString().trim()
-        val bio = binding.settingsBioInput.text.toString().trim()
+        viewModel.loadUser()
 
-        if (username.isEmpty() || email.isEmpty()) {
-            Toast.makeText(requireContext(), "Username and email cannot be empty", Toast.LENGTH_SHORT).show()
-            return
+        binding.backButton.setOnClickListener {
+            parentFragmentManager.popBackStack()
         }
 
         val textChanged =
@@ -201,47 +198,21 @@ class SettingsFragment : Fragment() {
                 e.printStackTrace()
                 Toast.makeText(requireContext(), "Update failed. Please try again.", Toast.LENGTH_SHORT).show()
             }
+            viewModel.saveSettings(username, email, password, bio)
         }
-    }
 
-    /**
-     * Logs the user out and navigates back to the login screen.
-     */
-    private fun logout() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            try {
-                authRepository.logout()
-            } catch (_: Exception) { }
-            navigateToLogin()
+        binding.logoutButton.setOnClickListener {
+            viewModel.logout()
         }
-    }
 
-    /**
-     * Deletes the account after a confirmation dialog.
-     * Blocks deletion for the protected test accounts by ID (alice=3, bob=4, carol=5, dave=6).
-     */
-    private fun deleteAccount() {
-        AlertDialog.Builder(requireContext())
-            .setTitle("Delete Account")
-            .setMessage("Are you sure? This action cannot be undone.")
-            .setPositiveButton("Delete") { _, _ ->
-                viewLifecycleOwner.lifecycleScope.launch {
-                    try {
-                        val success = userRepository.deleteUser()
-                        if (success) {
-                            Toast.makeText(requireContext(), "Account deleted", Toast.LENGTH_SHORT).show()
-                            navigateToLogin()
-                        } else {
-                            Toast.makeText(requireContext(), "Delete failed. Please try again.", Toast.LENGTH_SHORT).show()
-                        }
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                        Toast.makeText(requireContext(), "Delete failed. Please try again.", Toast.LENGTH_SHORT).show()
-                    }
-                }
-            }
-            .setNegativeButton("Cancel", null)
-            .show()
+        binding.deleteAccountButton.setOnClickListener {
+            AlertDialog.Builder(requireContext())
+                .setTitle("Delete Account")
+                .setMessage("Are you sure? This action cannot be undone.")
+                .setPositiveButton("Delete") { _, _ -> viewModel.deleteAccount() }
+                .setNegativeButton("Cancel", null)
+                .show()
+        }
     }
 
     /**

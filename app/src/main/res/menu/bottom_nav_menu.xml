@@ -16,4 +16,8 @@
         android:id="@+id/create"
         android:title="Create"
         android:icon="@drawable/create"/>
+    <item
+        android:id="@+id/notifications"
+        android:title="Notifications"
+        android:icon="@drawable/notification"/>
 </menu>

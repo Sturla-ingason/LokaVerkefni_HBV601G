@@ -40,6 +40,7 @@ object HttpRoutes {
     val UNLIKE_POST = "$BASE_URL/post/unlike"
     val GET_COMMENTS = "$BASE_URL/post/comment"
     val CREATE_COMMENT = "$BASE_URL/post/comment/create"
+    val DELETE_COMMENT = "$BASE_URL/post/comment/delete"
     val GET_LIKES = "$BASE_URL/post/likes"
     val GET_PROFILE_POSTS = "$BASE_URL/post/profileposts"
     val EDIT_POST = "$BASE_URL/post/edit"
@@ -51,5 +52,10 @@ object HttpRoutes {
     // Search
     val USER_SEARCH = "$BASE_URL/usersearch"
     val HASHTAG_SEARCH = "$BASE_URL/hashtagsearch"
+
+    // Notifications
+    val GET_NOTIFICATIONS = "$BASE_URL/notification/get"
+    val GET_UNREAD_COUNT = "$BASE_URL/notification/unread/count"
+    val MARK_NOTIFICATION_READ = "$BASE_URL/notification/mark-read"
 
 }
