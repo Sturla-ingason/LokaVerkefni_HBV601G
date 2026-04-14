@@ -51,4 +51,9 @@ object HttpRoutes {
     val USER_SEARCH = "$BASE_URL/usersearch"
     val HASHTAG_SEARCH = "$BASE_URL/hashtagsearch"
 
+    // Notifications
+    val GET_NOTIFICATIONS = "$BASE_URL/notification/get"
+    val GET_UNREAD_COUNT = "$BASE_URL/notification/unread/count"
+    val MARK_NOTIFICATION_READ = "$BASE_URL/notification/mark-read"
+
 }
