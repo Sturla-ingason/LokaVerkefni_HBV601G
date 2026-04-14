@@ -30,6 +30,7 @@ object HttpRoutes {
     val BLOCK_USER = "$BASE_URL/user/block"
     val UNBLOCK_USER = "$BASE_URL/user/unblock"
     val IS_BLOCKED = "$BASE_URL/user/isblocked"
+    val UPDATE_PROFILE_PICTURE = "$BASE_URL/user/update-picture"
 
     // Posts
     val CREATE_POST = "$BASE_URL/post/create"

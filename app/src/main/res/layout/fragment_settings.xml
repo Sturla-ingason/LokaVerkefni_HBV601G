@@ -35,7 +35,23 @@
                 android:textStyle="bold"
                 android:layout_marginStart="12dp" />
         </LinearLayout>
+        <ImageView
+            android:id="@+id/settingsProfileImage"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="12dp"
+            android:src="@android:drawable/ic_menu_gallery"
+            android:scaleType="centerCrop" />
 
+        <Button
+            android:id="@+id/changeProfilePictureButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="20dp"
+            android:text="Change profile picture" />
         <!-- Username -->
         <TextView
             android:layout_width="wrap_content"
@@ -100,7 +116,9 @@
                 android:background="@drawable/round_edit_text_background"
                 android:hint="@string/new_password_hint"
                 android:padding="10dp"
-                android:inputType="textPassword" />
+                android:inputType="textPassword"
+                android:importantForAutofill="no"
+                android:autofillHints=""/>
         </com.google.android.material.textfield.TextInputLayout>
 
         <!-- Bio -->

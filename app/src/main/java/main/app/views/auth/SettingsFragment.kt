@@ -1,16 +1,20 @@
 package main.app.views.auth
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import com.bumptech.glide.Glide
 import kotlinx.coroutines.launch
 import main.app.MainActivity
+import main.app.apiConnections.HttpRoutes
 import main.app.databinding.FragmentSettingsBinding
 import main.app.repository.AuthRepository
 import main.app.repository.UserRepository
@@ -29,6 +33,22 @@ class SettingsFragment : Fragment() {
     // Stores the current user ID so we can check it on delete
     private var currentUserId: Int? = null
 
+
+    private var originalUsername: String = ""
+    private var originalEmail: String = ""
+    private var originalBio: String = ""
+    private var selectedImageUri: Uri? = null
+
+
+    private val pickProfileImage =
+        registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+            uri ?: return@registerForActivityResult
+            selectedImageUri = uri
+            binding.settingsProfileImage.setImageURI(uri)
+            binding.settingsPasswordInput.setText("")
+        }
+
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -45,6 +65,10 @@ class SettingsFragment : Fragment() {
 
         binding.backButton.setOnClickListener {
             parentFragmentManager.popBackStack()
+        }
+
+        binding.changeProfilePictureButton.setOnClickListener {
+            pickProfileImage.launch("image/*")
         }
 
         binding.saveSettingsButton.setOnClickListener {
@@ -68,10 +92,26 @@ class SettingsFragment : Fragment() {
             try {
                 val user = userRepository.getUser()
                 currentUserId = user.userID
-                binding.settingsUsernameInput.setText(user.username ?: "")
-                binding.settingsEmailInput.setText(user.email ?: "")
-                binding.settingsBioInput.setText(user.bio ?: "")
-                // Password field is left empty on purpose
+
+                originalUsername = user.username ?: ""
+                originalEmail = user.email ?: ""
+                originalBio = user.bio ?: ""
+
+                binding.settingsUsernameInput.setText(originalUsername)
+                binding.settingsEmailInput.setText(originalEmail)
+                binding.settingsBioInput.setText(originalBio)
+                binding.settingsPasswordInput.setText("")
+
+                if (user.imageId != null && user.imageId != 0) {
+                    val imageUrl = "${HttpRoutes.GET_IMAGE}/${user.imageId}"
+                    Glide.with(this@SettingsFragment)
+                        .load(imageUrl)
+                        .placeholder(android.R.drawable.ic_menu_gallery)
+                        .into(binding.settingsProfileImage)
+                } else {
+                    binding.settingsProfileImage.setImageResource(android.R.drawable.ic_menu_gallery)
+                }
+
             } catch (e: Exception) {
                 e.printStackTrace()
                 Toast.makeText(requireContext(), "Failed to load profile data", Toast.LENGTH_SHORT).show()
@@ -94,15 +134,69 @@ class SettingsFragment : Fragment() {
             return
         }
 
+        val textChanged =
+            username != originalUsername ||
+                    email != originalEmail ||
+                    bio != originalBio ||
+                    password.isNotEmpty()
+
+        val pictureChanged = selectedImageUri != null
+
+        if (!textChanged && !pictureChanged) {
+            Toast.makeText(requireContext(), "No changes to save", Toast.LENGTH_SHORT).show()
+            return
+        }
+
         viewLifecycleOwner.lifecycleScope.launch {
             try {
-                val success = userRepository.updateUser(username, email, password, bio)
-                if (success) {
-                    Toast.makeText(requireContext(), "Profile updated!", Toast.LENGTH_SHORT).show()
-                    parentFragmentManager.popBackStack()
-                } else {
-                    Toast.makeText(requireContext(), "Update failed. Please try again.", Toast.LENGTH_SHORT).show()
+                var profileSuccess = true
+                var pictureSuccess = true
+
+                if (textChanged) {
+                    profileSuccess = userRepository.updateUser(
+                        username = username,
+                        email = email,
+                        password = password,
+                        bio = bio
+                    )
                 }
+
+                if (pictureChanged) {
+                    val uri = selectedImageUri!!
+                    val imageBytes = requireContext().contentResolver
+                        .openInputStream(uri)
+                        ?.use { it.readBytes() }
+
+                    val mimeType = requireContext().contentResolver.getType(uri) ?: "image/jpeg"
+
+                    pictureSuccess = if (imageBytes != null) {
+                        userRepository.updateProfilePicture(imageBytes, mimeType)
+                    } else {
+                        false
+                    }
+                }
+
+                when {
+                    !profileSuccess -> {
+                        Toast.makeText(requireContext(), "Profile text update failed", Toast.LENGTH_SHORT).show()
+                    }
+                    !pictureSuccess -> {
+                        Toast.makeText(requireContext(), "Profile picture update failed", Toast.LENGTH_SHORT).show()
+                    }
+                    else -> {
+                        Toast.makeText(requireContext(), "Profile updated!", Toast.LENGTH_SHORT).show()
+
+                        originalUsername = username
+                        originalEmail = email
+                        originalBio = bio
+
+                        binding.settingsPasswordInput.setText("")
+                        selectedImageUri = null
+
+                        parentFragmentManager.popBackStack()
+                    }
+                }
+
             } catch (e: Exception) {
                 e.printStackTrace()
                 Toast.makeText(requireContext(), "Update failed. Please try again.", Toast.LENGTH_SHORT).show()

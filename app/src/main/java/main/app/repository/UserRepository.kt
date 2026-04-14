@@ -1,11 +1,17 @@
 package main.app.repository
 
 import io.ktor.client.call.body
+import io.ktor.client.request.forms.MultiPartFormDataContent
+import io.ktor.client.request.forms.formData
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
 import io.ktor.client.request.patch
 import io.ktor.client.request.post
+import io.ktor.client.request.put
+import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
+import io.ktor.http.Headers
+import io.ktor.http.HttpHeaders
 import io.ktor.http.isSuccess
 import main.app.apiConnections.HttpRoutes
 import main.app.apiConnections.KtorClient
@@ -43,7 +49,7 @@ class UserRepository {
      */
     suspend fun updateUser(username: String, email: String, password: String, bio: String): Boolean {
         return try {
-            val response: HttpResponse = KtorClient.httpClient.post(HttpRoutes.UPDATE_USER) {
+            val response: HttpResponse = KtorClient.httpClient.put(HttpRoutes.UPDATE_USER) {
                 parameter("username", username)
                 parameter("email", email)
                 if (password.isNotEmpty()) {
@@ -120,6 +126,29 @@ class UserRepository {
     suspend fun deleteUser(): Boolean {
         return try {
             val response: HttpResponse = KtorClient.httpClient.post(HttpRoutes.DELETE_USER)
+            response.status.isSuccess()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
+        }
+    }
+
+    suspend fun updateProfilePicture(imageBytes: ByteArray, mimeType: String): Boolean {
+        return try {
+            val response: HttpResponse = KtorClient.httpClient.put(HttpRoutes.UPDATE_PROFILE_PICTURE) {
+                setBody(
+                    MultiPartFormDataContent(
+                        formData {
+                            append("image", imageBytes, Headers.build {
+                                append(HttpHeaders.ContentType, mimeType)
+                                append(HttpHeaders.ContentDisposition, "filename=\"photo.jpg\"")
+                            })
+                        }
+                    )
+                )
+            }
+
+            println("updateProfilePicture status = ${response.status}")
             response.status.isSuccess()
         } catch (e: Exception) {
             e.printStackTrace()
