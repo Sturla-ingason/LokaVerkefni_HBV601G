@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -31,6 +32,11 @@ class NotificationFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         val badge = view.findViewById<TextView>(R.id.unreadCountBadge)
+        val markAllReadButton = view.findViewById<Button>(R.id.markAllReadButton)
+
+        markAllReadButton.setOnClickListener {
+            viewModel.markAllAsRead()
+        }
 
         adapter = NotificationAdapter(emptyList()) { notification ->
             val id = notification.id ?: return@NotificationAdapter
@@ -54,8 +60,10 @@ class NotificationFragment : Fragment() {
                 if (count > 0) {
                     badge.visibility = View.VISIBLE
                     badge.text = count.toString()
+                    markAllReadButton.visibility = View.VISIBLE
                 } else {
                     badge.visibility = View.GONE
+                    markAllReadButton.visibility = View.GONE
                 }
             }
         }
