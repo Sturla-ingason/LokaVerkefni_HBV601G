@@ -10,10 +10,7 @@ import kotlinx.coroutines.launch
 import main.app.dataModel.Comment
 import main.app.repository.CommentRepository
 
-/**
- * ViewModel for CommentFragment.
- * Handles loading comments and adding new ones.
- */
+
 class CommentViewModel : ViewModel() {
 
     private val commentRepository = CommentRepository()
@@ -21,11 +18,11 @@ class CommentViewModel : ViewModel() {
     private val _comments = MutableStateFlow<List<Comment>>(emptyList())
     val comments: StateFlow<List<Comment>> = _comments
 
-    /** Emits once after a comment is successfully added so the fragment can scroll and clear input. */
+
     private val _commentAdded = MutableSharedFlow<Unit>()
     val commentAdded: SharedFlow<Unit> = _commentAdded
 
-    /** Emits an error message to show as a toast. */
+
     private val _error = MutableSharedFlow<String>()
     val error: SharedFlow<String> = _error
 

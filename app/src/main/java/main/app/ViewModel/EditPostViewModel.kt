@@ -11,24 +11,20 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import main.app.repository.PostRepository
 
-/**
- * ViewModel for EditPostFragment.
- * Handles saving edits and deleting posts.
- * Uses AndroidViewModel so it can access contentResolver for reading image bytes.
- */
+
 class EditPostViewModel(application: Application) : AndroidViewModel(application) {
 
     private val postRepository = PostRepository()
 
-    /** The updated description returned by the server after a successful save. Null = not triggered / consumed. */
+
     private val _saveResult = MutableLiveData<String?>()
     val saveResult: LiveData<String?> = _saveResult
 
-    /** True once delete succeeds. Null = not triggered / consumed. */
+
     private val _deleteComplete = MutableLiveData<Boolean?>()
     val deleteComplete: LiveData<Boolean?> = _deleteComplete
 
-    /** Error message to show as a toast. Null = no error / consumed. */
+
     private val _error = MutableLiveData<String?>()
     val error: LiveData<String?> = _error
 
