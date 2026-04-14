@@ -14,7 +14,15 @@ import kotlinx.serialization.json.Json
  * we are using http cookies for sessions and session based login
  */
 object KtorClient {
-    val httpClient = HttpClient(OkHttp) {
+    var httpClient: HttpClient = buildClient()
+        private set
+
+    fun resetClient() {
+        httpClient.close()
+        httpClient = buildClient()
+    }
+
+    private fun buildClient() = HttpClient(OkHttp) {
         install(Logging) {
             level = LogLevel.ALL
         }

@@ -9,22 +9,35 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import main.app.dataModel.Comment
 import main.app.repository.CommentRepository
+import main.app.repository.UserRepository
 
 
 class CommentViewModel : ViewModel() {
 
     private val commentRepository = CommentRepository()
+    private val userRepository = UserRepository()
 
     private val _comments = MutableStateFlow<List<Comment>>(emptyList())
     val comments: StateFlow<List<Comment>> = _comments
 
+    private val _currentUserId = MutableStateFlow<Int?>(null)
+    val currentUserId: StateFlow<Int?> = _currentUserId
 
     private val _commentAdded = MutableSharedFlow<Unit>()
     val commentAdded: SharedFlow<Unit> = _commentAdded
 
-
     private val _error = MutableSharedFlow<String>()
     val error: SharedFlow<String> = _error
+
+    init {
+        viewModelScope.launch {
+            try {
+                _currentUserId.value = userRepository.getUser().userID
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
 
     fun loadComments(postId: Int) {
         viewModelScope.launch {
@@ -33,6 +46,18 @@ class CommentViewModel : ViewModel() {
             } catch (e: Exception) {
                 e.printStackTrace()
                 _error.emit("Failed to load comments")
+            }
+        }
+    }
+
+    fun deleteComment(commentId: Int) {
+        viewModelScope.launch {
+            try {
+                commentRepository.deleteComment(commentId)
+                _comments.value = _comments.value.filter { it.commentID != commentId }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                _error.emit("Failed to delete comment")
             }
         }
     }

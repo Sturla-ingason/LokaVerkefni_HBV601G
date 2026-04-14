@@ -1,5 +1,6 @@
 package main.app.repository
 
+import io.ktor.client.call.body
 import io.ktor.client.request.parameter
 import io.ktor.client.request.post
 import io.ktor.client.statement.HttpResponse
@@ -21,9 +22,13 @@ class AuthRepository {
                 parameter("email", email)
                 parameter("password", password)
             }
-            response.status.isSuccess()
+            val body = response.body<String>()
+            val success = response.status.isSuccess() && !body.contains("not found", ignoreCase = true)
+            if (!success) KtorClient.resetClient()
+            success
         } catch (e: Exception) {
             e.printStackTrace()
+            KtorClient.resetClient()
             false
         }
     }
@@ -36,8 +41,10 @@ class AuthRepository {
     suspend fun logout(): Boolean {
         return try {
             val response: HttpResponse = KtorClient.httpClient.post(HttpRoutes.LOGOUT)
+            KtorClient.resetClient()
             response.status.isSuccess()
         } catch (e: Exception) {
+            KtorClient.resetClient()
             false
         }
     }
