@@ -9,19 +9,18 @@ import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import main.app.R
+import main.app.ViewModel.FollowListViewModel
 import main.app.adapters.FollowListAdapter
-import main.app.repository.UserRepository
 
 class FollowListFragment : DialogFragment() {
 
-    private val userRepository = UserRepository()
+    private val viewModel: FollowListViewModel by viewModels()
 
     companion object {
         const val MODE_FOLLOWERS = "Followers"
@@ -59,10 +58,7 @@ class FollowListFragment : DialogFragment() {
         val recyclerView = view.findViewById<RecyclerView>(R.id.followListRecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
-        // Declare as lateinit so the action callback can reference it
-        lateinit var adapter: FollowListAdapter
-
-        adapter = FollowListAdapter(
+        val adapter = FollowListAdapter(
             users = mutableListOf(),
             mode = mode,
             isOwnProfile = isOwnProfile,
@@ -74,36 +70,31 @@ class FollowListFragment : DialogFragment() {
                     .addToBackStack(null)
                     .commit()
             },
-            onActionClick = { user, button ->
-                val uid = user.userID ?: return@FollowListAdapter
-                viewLifecycleOwner.lifecycleScope.launch {
-                    try {
-                        withContext(Dispatchers.IO) {
-                            if (mode == MODE_FOLLOWING) userRepository.unfollowUser(uid)
-                            else userRepository.removeFollower(uid)
-                        }
-                        adapter.removeUser(user)
-                    } catch (e: Exception) {
-                        Toast.makeText(context, "Action failed", Toast.LENGTH_SHORT).show()
-                        button.isEnabled = true
-                    }
-                }
+            onActionClick = { user, _ ->
+                viewModel.removeUser(user, mode)
             }
         )
 
         recyclerView.adapter = adapter
 
         viewLifecycleOwner.lifecycleScope.launch {
-            try {
-                val users = withContext(Dispatchers.IO) {
-                    if (mode == MODE_FOLLOWERS) userRepository.getFollowers(userId)
-                    else userRepository.getFollowing(userId)
-                }
+            viewModel.users.collect { users ->
                 adapter.updateData(users)
-            } catch (e: Exception) {
-                Toast.makeText(context, "Failed to load $mode", Toast.LENGTH_SHORT).show()
             }
         }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.error.collect { message ->
+                Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        viewModel.loadList(userId, mode)
+    }
+
+    override fun onDismiss(dialog: android.content.DialogInterface) {
+        super.onDismiss(dialog)
+        parentFragmentManager.setFragmentResult("follow_list_dismissed", Bundle())
     }
 
     override fun onStart() {
