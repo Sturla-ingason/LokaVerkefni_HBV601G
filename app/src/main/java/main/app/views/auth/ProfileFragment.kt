@@ -63,6 +63,8 @@ class ProfileFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        viewModel.init(requireContext())
+
         val passedUserId = arguments?.getInt("userId")
         targetUserId = if (passedUserId == null || passedUserId == -1) null else passedUserId
 
@@ -120,6 +122,13 @@ class ProfileFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.error.collect { message ->
                 Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        // Show offline stored data if using cached data
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.isOffline.collect { offline ->
+                if (offline) Toast.makeText(context, "You are offline — showing cached profile", Toast.LENGTH_LONG).show()
             }
         }
 
