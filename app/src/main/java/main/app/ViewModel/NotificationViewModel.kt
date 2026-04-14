@@ -2,6 +2,8 @@ package main.app.ViewModel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -32,6 +34,21 @@ class NotificationViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 _unreadCount.value = repository.getUnreadCount()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
+    fun markAllAsRead() {
+        viewModelScope.launch {
+            try {
+                val unread = _notifications.value.filter { it.read != true }
+                unread.map { notification ->
+                    async { notification.id?.let { repository.markAsRead(it) } }
+                }.awaitAll()
+                _notifications.value = _notifications.value.map { it.copy(read = true) }
+                _unreadCount.value = 0
             } catch (e: Exception) {
                 e.printStackTrace()
             }

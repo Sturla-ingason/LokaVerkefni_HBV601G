@@ -112,7 +112,10 @@ class PostDetailFragment : DialogFragment() {
             detailImage.visibility = View.GONE
         }
 
-        commentAdapter = CommentAdapter(post.comments ?: emptyList())
+        commentAdapter = CommentAdapter(
+            commentList = post.comments ?: emptyList(),
+            onDelete = { commentId -> viewModel.deleteComment(commentId) }
+        )
         commentsRecyclerView.layoutManager = LinearLayoutManager(context)
         commentsRecyclerView.adapter = commentAdapter
 
@@ -169,6 +172,13 @@ class PostDetailFragment : DialogFragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.comments.collect { comments ->
                 commentAdapter.updateData(comments)
+            }
+        }
+
+        // Observe current user so delete buttons show on own comments
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.currentUserId.collect { uid ->
+                commentAdapter.setCurrentUserId(uid)
             }
         }
 

@@ -63,7 +63,10 @@ class CommentFragment : DialogFragment() {
         @Suppress("UNCHECKED_CAST")
         val initialComments = arguments?.getSerializable("comments") as? List<Comment> ?: emptyList()
 
-        adapter = CommentAdapter(initialComments)
+        adapter = CommentAdapter(
+            commentList = initialComments,
+            onDelete = { commentId -> viewModel.deleteComment(commentId) }
+        )
         recyclerView = view.findViewById(R.id.recycleView)
         recyclerView.layoutManager = LinearLayoutManager(context)
         recyclerView.adapter = adapter
@@ -78,6 +81,13 @@ class CommentFragment : DialogFragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.comments.collect { comments ->
                 adapter.updateData(comments)
+            }
+        }
+
+        // Observe current user so delete buttons show on own comments
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.currentUserId.collect { uid ->
+                adapter.setCurrentUserId(uid)
             }
         }
 
@@ -110,6 +120,11 @@ class CommentFragment : DialogFragment() {
         }
     }
 
+
+    override fun onDismiss(dialog: android.content.DialogInterface) {
+        super.onDismiss(dialog)
+        parentFragmentManager.setFragmentResult("comment_dismissed", Bundle())
+    }
 
     /**
      * What to do when we start the fragment

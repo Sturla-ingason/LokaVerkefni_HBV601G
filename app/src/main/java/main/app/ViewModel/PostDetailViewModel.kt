@@ -63,13 +63,29 @@ class PostDetailViewModel : ViewModel() {
     private val _error = MutableSharedFlow<String>()
     val error: SharedFlow<String> = _error
 
+    private val _currentUserId = MutableStateFlow<Int?>(null)
+    val currentUserId: StateFlow<Int?> = _currentUserId
+
     fun checkEditButton(postUserId: Int?) {
         viewModelScope.launch {
             try {
                 val currentUser = userRepository.getUser()
+                _currentUserId.value = currentUser.userID
                 _showEditButton.value = currentUser.userID == postUserId
             } catch (e: Exception) {
                 // leave hidden
+            }
+        }
+    }
+
+    fun deleteComment(commentId: Int) {
+        viewModelScope.launch {
+            try {
+                commentRepository.deleteComment(commentId)
+                _comments.value = _comments.value.filter { it.commentID != commentId }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                _error.emit("Failed to delete comment")
             }
         }
     }

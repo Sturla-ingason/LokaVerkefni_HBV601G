@@ -58,6 +58,10 @@ class HomePage : Fragment() {
             viewModel.loadPosts()
         }
 
+        childFragmentManager.setFragmentResultListener("comment_dismissed", viewLifecycleOwner) { _, _ ->
+            viewModel.loadPosts()
+        }
+
         viewModel.loadPosts()
     }
 }
