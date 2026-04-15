@@ -15,6 +15,9 @@ class HomeViewModel : ViewModel() {
     private val _posts = MutableStateFlow<List<Post>>(emptyList())
     val posts: StateFlow<List<Post>> = _posts
 
+    /**
+     * Loads the posts of the home feed
+     */
     fun loadPosts() {
         viewModelScope.launch {
             try {
@@ -25,6 +28,10 @@ class HomeViewModel : ViewModel() {
         }
     }
 
+    //TODO finish commenting this out
+    /**
+     *
+     */
     fun toggleLike(postId: Int) {
         viewModelScope.launch {
             val post = _posts.value.find { it.postID == postId } ?: return@launch

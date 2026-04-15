@@ -24,6 +24,11 @@ class SearchViewModel : ViewModel() {
     private val _results = MutableStateFlow<SearchResults>(SearchResults.Idle)
     val results: StateFlow<SearchResults> = _results
 
+
+    /**
+     * Allows a user to search for users and posts or a # if the string start with a #
+     * @param query the query string for the search
+     */
     fun search(query: String) {
         if (query.isBlank()) return
         viewModelScope.launch {
@@ -39,6 +44,11 @@ class SearchViewModel : ViewModel() {
         }
     }
 
+
+    //TODO comment this out
+    /**
+     *
+     */
     fun toggleLike(postId: Int) {
         val current = (_results.value as? SearchResults.Posts)?.posts ?: return
         val post = current.find { it.postID == postId } ?: return

@@ -20,6 +20,12 @@ class FollowListViewModel : ViewModel() {
     private val _error = MutableSharedFlow<String>()
     val error: SharedFlow<String> = _error
 
+    /**
+     * Returns either the list of the Followers of the account or a list of
+     * who the user is following
+     * @param userId the owner of the two lists
+     * @param mode determens if it is followers or following that we are geting
+     */
     fun loadList(userId: Int, mode: String) {
         viewModelScope.launch {
             try {
@@ -35,6 +41,13 @@ class FollowListViewModel : ViewModel() {
         }
     }
 
+
+    /**
+     * Allows a user to either remove a user so they stop following their account
+     * or allows the user to unfollow a user that they are following
+     * @param user the user that is performing the action
+     * @param mode determins if we are removing a user or unfollowing them
+     */
     fun removeUser(user: User, mode: String) {
         viewModelScope.launch {
             try {

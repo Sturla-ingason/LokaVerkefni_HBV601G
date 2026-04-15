@@ -10,12 +10,22 @@ import main.app.dataModel.User
 
 class SearchRepository {
 
+
+    /**
+     * Calles the API and searches for a user
+     * @param username the name of the user to search for
+     */
     suspend fun searchUsers(username: String): List<User> {
         return KtorClient.httpClient.get(HttpRoutes.USER_SEARCH) {
             parameter("username", username)
         }.body()
     }
 
+
+    /**
+     * Calles the API and searches for a hashtag on a post
+     * @param hashtag the hashtag to search for.
+     */
     suspend fun searchHashtags(hashtag: String): List<Post> {
         val cleanTag = hashtag.removePrefix("#")
 

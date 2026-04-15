@@ -29,6 +29,10 @@ class CommentViewModel : ViewModel() {
     private val _error = MutableSharedFlow<String>()
     val error: SharedFlow<String> = _error
 
+    //TODO comment out this function
+    /**
+     *
+     */
     init {
         viewModelScope.launch {
             try {
@@ -39,6 +43,10 @@ class CommentViewModel : ViewModel() {
         }
     }
 
+    /**
+     * Gets the comments for a certain post
+     * @param postId id of the post to get the comments for
+     */
     fun loadComments(postId: Int) {
         viewModelScope.launch {
             try {
@@ -50,6 +58,10 @@ class CommentViewModel : ViewModel() {
         }
     }
 
+    /**
+     * Allows a user to delete their own comment on any post
+     * @param commentId the id of the comment to delete
+     */
     fun deleteComment(commentId: Int) {
         viewModelScope.launch {
             try {
@@ -62,15 +74,25 @@ class CommentViewModel : ViewModel() {
         }
     }
 
+    /**
+     * Allows the user to add a new comment to a post
+     * @param postId id of the post the comment is for
+     * @param text the content of the comment
+     */
     fun addComment(postId: Int, text: String) {
         viewModelScope.launch {
             try {
                 commentRepository.createComment(postId, text)
-                _comments.value = commentRepository.getComments(postId)
-                _commentAdded.emit(Unit)
             } catch (e: Exception) {
                 e.printStackTrace()
                 _error.emit("Failed to post comment")
+                return@launch
+            }
+            _commentAdded.emit(Unit)
+            try {
+                _comments.value = commentRepository.getComments(postId)
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
         }
     }
