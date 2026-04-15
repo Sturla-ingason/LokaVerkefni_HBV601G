@@ -1,5 +1,6 @@
 package main.app.ViewModel
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -15,7 +16,7 @@ import main.app.repository.UserRepository
 class ProfileViewModel : ViewModel() {
 
     private val postRepository = PostRepository()
-    private val userRepository = UserRepository()
+    private var userRepository = UserRepository()
 
     private val _posts = MutableStateFlow<List<Post>>(emptyList())
     val posts: StateFlow<List<Post>> = _posts
@@ -29,8 +30,15 @@ class ProfileViewModel : ViewModel() {
     private val _isBlocked = MutableStateFlow(false)
     val isBlocked: StateFlow<Boolean> = _isBlocked
 
+    private val _isOffline = MutableStateFlow(false)
+    val isOffline: StateFlow<Boolean> = _isOffline
+
     private val _error = MutableSharedFlow<String>()
     val error: SharedFlow<String> = _error
+
+    fun init(context: Context) {
+        userRepository = UserRepository(context)
+    }
 
     fun loadPosts(userId: Int?) {
         viewModelScope.launch {
@@ -48,8 +56,16 @@ class ProfileViewModel : ViewModel() {
             try {
                 _user.value = if (userId != null) userRepository.getUserById(userId)
                               else userRepository.getUser()
+                _isOffline.value = false
             } catch (e: Exception) {
                 e.printStackTrace()
+                if (userId == null) {
+                    val cached = userRepository.getCachedUser()
+                    if (cached != null) {
+                        _user.value = cached
+                        _isOffline.value = true
+                    }
+                }
             }
         }
     }

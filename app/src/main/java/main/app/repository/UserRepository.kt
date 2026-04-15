@@ -16,8 +16,27 @@ import io.ktor.http.isSuccess
 import main.app.apiConnections.HttpRoutes
 import main.app.apiConnections.KtorClient
 import main.app.dataModel.User
+import android.content.Context
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 
-class UserRepository {
+class UserRepository(private val context: Context? = null) {
+    private val prefs by lazy {
+        context?.getSharedPreferences("user_cache", Context.MODE_PRIVATE)
+    }
+
+    private fun cacheUser(user: User) {
+        prefs?.edit()?.putString("cached_user", Json.encodeToString(user))?.apply()
+    }
+
+    fun getCachedUser(): User? {
+        val json = prefs?.getString("cached_user", null) ?: return null
+        return try {
+            Json { ignoreUnknownKeys = true }.decodeFromString(json)
+        } catch (e: Exception) {
+            null
+        }
+    }
 
     suspend fun getFollowerCount(): Int {
         return KtorClient.httpClient.get(HttpRoutes.FOLLOWER_COUNT).body()
@@ -30,7 +49,9 @@ class UserRepository {
 
 
     suspend fun getUser(): User {
-        return KtorClient.httpClient.get(HttpRoutes.GET_USER).body()
+        val user = KtorClient.httpClient.get(HttpRoutes.GET_USER).body<User>()
+        cacheUser(user)
+        return user
     }
 
     suspend fun getUserById(userId: Int): User {
