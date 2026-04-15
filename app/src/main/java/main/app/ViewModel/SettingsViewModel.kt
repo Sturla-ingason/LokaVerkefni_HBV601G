@@ -82,6 +82,20 @@ class SettingsViewModel : ViewModel() {
         }
     }
 
+    fun updateProfilePicture(imageBytes: ByteArray, mimeType: String) {
+        viewModelScope.launch {
+            try {
+                val success = withContext(Dispatchers.IO) {
+                    userRepository.updateProfilePicture(imageBytes, mimeType)
+                }
+                _updateResult.value = success
+            } catch (e: Exception) {
+                e.printStackTrace()
+                _updateResult.value = false
+            }
+        }
+    }
+
 
     fun clearUpdateResult() { _updateResult.value = null }
     fun clearLogoutComplete() { _logoutComplete.value = null }
