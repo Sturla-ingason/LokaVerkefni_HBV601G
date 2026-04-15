@@ -35,6 +35,10 @@ class SettingsViewModel : ViewModel() {
     private val _loadError = MutableLiveData<Boolean?>()
     val loadError: LiveData<Boolean?> = _loadError
 
+    //TODO comment this out
+    /**
+     *
+     */
     fun loadUser() {
         viewModelScope.launch {
             try {
@@ -47,6 +51,14 @@ class SettingsViewModel : ViewModel() {
         }
     }
 
+
+    /**
+     * Allows a user to updated their settings for the account
+     * @param username the user name the user wants's to use
+     * @param email the email the account sholud be connected to
+     * @param password the password to the account
+     * @param bio the bio/description of the user
+     */
     fun saveSettings(username: String, email: String, password: String, bio: String) {
         viewModelScope.launch {
             try {
@@ -61,6 +73,10 @@ class SettingsViewModel : ViewModel() {
         }
     }
 
+
+    /**
+     * Allows a user to logout of their account
+     */
     fun logout() {
         viewModelScope.launch {
             try {
@@ -70,6 +86,10 @@ class SettingsViewModel : ViewModel() {
         }
     }
 
+
+    /**
+     * Allows the user to delete their account
+     */
     fun deleteAccount() {
         viewModelScope.launch {
             try {
@@ -82,6 +102,13 @@ class SettingsViewModel : ViewModel() {
         }
     }
 
+
+    //TODO comment this out
+    /**
+     * Allows the user to updated their profile picture
+     * @param imageBytes
+     * @param mimeType
+     */
     fun updateProfilePicture(imageBytes: ByteArray, mimeType: String) {
         viewModelScope.launch {
             try {
@@ -97,8 +124,30 @@ class SettingsViewModel : ViewModel() {
     }
 
 
+    //TODO comment this out
+    /**
+     *
+     */
     fun clearUpdateResult() { _updateResult.value = null }
+
+
+    //TODO comment this out
+    /**
+     *
+     */
     fun clearLogoutComplete() { _logoutComplete.value = null }
+
+
+    //TODO comment this out
+    /**
+     *
+     */
     fun clearDeleteResult() { _deleteResult.value = null }
+
+
+    //TODO comment this out
+    /**
+     *
+     */
     fun clearLoadError() { _loadError.value = null }
 }

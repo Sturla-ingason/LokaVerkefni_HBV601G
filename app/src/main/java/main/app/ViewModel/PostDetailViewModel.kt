@@ -31,15 +31,41 @@ class PostDetailViewModel : ViewModel() {
     private val _likeCount = MutableStateFlow(0)
     val likeCount: StateFlow<Int> = _likeCount
 
+    private val _likedUsers = MutableSharedFlow<List<User>>()
+    val likedUsers: SharedFlow<List<User>> = _likedUsers
+
+    private val _commentAdded = MutableSharedFlow<Unit>()
+    val commentAdded: SharedFlow<Unit> = _commentAdded
+
+    private val _error = MutableSharedFlow<String>()
+    val error: SharedFlow<String> = _error
+
+    private val _currentUserId = MutableStateFlow<Int?>(null)
+    val currentUserId: StateFlow<Int?> = _currentUserId
+
+
+    /**
+     * initiats the comments for the post
+     */
     fun initComments(comments: List<Comment>) {
         _comments.value = comments
     }
 
+
+    //TODO comment this out
+    /**
+     *
+     */
     fun initLikeState(liked: Boolean, count: Int) {
         _isLiked.value = liked
         _likeCount.value = count
     }
 
+
+    //TODO comment this out
+    /**
+     *
+     */
     fun toggleLike(postId: Int) {
         viewModelScope.launch {
             val currentlyLiked = _isLiked.value
@@ -54,18 +80,11 @@ class PostDetailViewModel : ViewModel() {
         }
     }
 
-    private val _likedUsers = MutableSharedFlow<List<User>>()
-    val likedUsers: SharedFlow<List<User>> = _likedUsers
 
-    private val _commentAdded = MutableSharedFlow<Unit>()
-    val commentAdded: SharedFlow<Unit> = _commentAdded
-
-    private val _error = MutableSharedFlow<String>()
-    val error: SharedFlow<String> = _error
-
-    private val _currentUserId = MutableStateFlow<Int?>(null)
-    val currentUserId: StateFlow<Int?> = _currentUserId
-
+    //TODO comment this out
+    /**
+     * Shows the edit button for the posts that the user owns
+     */
     fun checkEditButton(postUserId: Int?) {
         viewModelScope.launch {
             try {
@@ -78,6 +97,11 @@ class PostDetailViewModel : ViewModel() {
         }
     }
 
+
+    /**
+     * Allows a user to delete a comment that they own
+     * @param commentId the id of the comment to be deleted
+     */
     fun deleteComment(commentId: Int) {
         viewModelScope.launch {
             try {
@@ -90,6 +114,11 @@ class PostDetailViewModel : ViewModel() {
         }
     }
 
+
+    //TODO comment this out
+    /**
+     *
+     */
     fun loadLikes(postId: Int) {
         viewModelScope.launch {
             try {
@@ -101,6 +130,11 @@ class PostDetailViewModel : ViewModel() {
         }
     }
 
+
+    //TODO comment this out
+    /**
+     *
+     */
     fun loadComments(postId: Int) {
         viewModelScope.launch {
             try {
@@ -112,14 +146,26 @@ class PostDetailViewModel : ViewModel() {
         }
     }
 
+
+    /**
+     * Allows a user to add a comment to the viewd post
+     * @param postId the id of the post that is being viewd
+     * @param text the content of the comment
+     */
     fun addComment(postId: Int, text: String) {
         viewModelScope.launch {
             try {
                 commentRepository.createComment(postId, text)
-                _comments.value = commentRepository.getComments(postId)
-                _commentAdded.emit(Unit)
             } catch (e: Exception) {
+                e.printStackTrace()
                 _error.emit("Failed to post comment")
+                return@launch
+            }
+            _commentAdded.emit(Unit)
+            try {
+                _comments.value = commentRepository.getComments(postId)
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
         }
     }

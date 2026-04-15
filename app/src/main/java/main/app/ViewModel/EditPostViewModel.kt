@@ -28,6 +28,13 @@ class EditPostViewModel(application: Application) : AndroidViewModel(application
     private val _error = MutableLiveData<String?>()
     val error: LiveData<String?> = _error
 
+    /**
+     * Allows a user to save any changes he has made to the post
+     * @param postId the id of the post to change the information for
+     * @param description the text content of the post
+     * @param removeImageIds the id of the images to be removed from the post
+     * @param newImageUri the bytearay of the new image ot be added to the post
+     */
     fun savePost(
         postId: Int,
         description: String,
@@ -56,6 +63,11 @@ class EditPostViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
+
+    /**
+     * Allows the user to delete there own post
+     * @param postId the id of the post to be deleted
+     */
     fun deletePost(postId: Int) {
         viewModelScope.launch {
             try {
@@ -70,7 +82,21 @@ class EditPostViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
+    //TODO finish commenting this out
+    /**
+     *
+     */
     fun clearSaveResult() { _saveResult.value = null }
+
+    //TODO finish commenting this out
+    /**
+     *
+     */
     fun clearDeleteComplete() { _deleteComplete.value = null }
+
+    //TODO finish commenting this out
+    /**
+     *
+     */
     fun clearError() { _error.value = null }
 }

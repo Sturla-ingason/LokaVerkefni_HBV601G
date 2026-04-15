@@ -24,6 +24,11 @@ class AuthViewModel : ViewModel() {
     private val _signupState = MutableStateFlow<AuthState>(AuthState.Idle)
     val signupState: StateFlow<AuthState> = _signupState
 
+    /**
+     * handles log inn for the user
+     * @param email for the acccount of the user
+     * @param password of the account of the user
+     */
     fun login(email: String, password: String) {
         viewModelScope.launch {
             _loginState.value = AuthState.Loading
@@ -33,6 +38,12 @@ class AuthViewModel : ViewModel() {
         }
     }
 
+    /**
+     * Allows a new user to sign upp to the service
+     * @param email the email for the new user
+     * @param username the name of the new user
+     * @param password for the account that the user is creating
+     */
     fun signup(email: String, username: String, password: String) {
         viewModelScope.launch {
             _signupState.value = AuthState.Loading

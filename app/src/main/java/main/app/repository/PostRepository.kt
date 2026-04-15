@@ -1,5 +1,6 @@
 package main.app.repository
 
+import android.content.Context
 import io.ktor.client.call.body
 import io.ktor.client.request.forms.MultiPartFormDataContent
 import io.ktor.client.request.forms.formData
@@ -14,18 +15,44 @@ import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
 import main.app.apiConnections.HttpRoutes
 import main.app.apiConnections.KtorClient
+import main.app.database.AppDatabase
+import main.app.database.toEntity
+import main.app.database.toPost
 import main.app.dataModel.Post
 import main.app.dataModel.User
 
-class PostRepository {
+class PostRepository(private val context: Context? = null) {
+
+    private val postDao by lazy {
+        context?.let { AppDatabase.getDatabase(it).postDao() }
+    }
+
+    private fun currentUserId(): Int? =
+        context?.let { UserRepository(it).getCachedUser()?.userID }
+
+    private suspend fun cachePosts(posts: List<Post>) {
+        val userId = currentUserId() ?: return
+        postDao?.let { dao ->
+            dao.deleteAllForUser(userId)
+            dao.insertAll(posts.map { it.toEntity(userId) })
+        }
+    }
+
+    suspend fun getCachedPosts(): List<Post>? {
+        val userId = currentUserId() ?: return null
+        return postDao?.getPostsForUser(userId)?.map { it.toPost() }?.ifEmpty { null }
+    }
+
     suspend fun getPosts(): List<Post> {
         return KtorClient.httpClient.get(HttpRoutes.GET_FEED).body<List<Post>>()
             .sortedByDescending { it.postID }
     }
 
     suspend fun getPostByUser(): List<Post> {
-        return KtorClient.httpClient.get(HttpRoutes.GET_USERS_POSTS).body<List<Post>>()
+        val posts = KtorClient.httpClient.get(HttpRoutes.GET_USERS_POSTS).body<List<Post>>()
             .sortedByDescending { it.postID }
+        cachePosts(posts)
+        return posts
     }
 
     suspend fun likePost(postId: Int) {

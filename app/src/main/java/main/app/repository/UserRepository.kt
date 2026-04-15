@@ -21,14 +21,29 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
 class UserRepository(private val context: Context? = null) {
+
+    //TODO comment this out
+    /**
+     *
+     */
     private val prefs by lazy {
         context?.getSharedPreferences("user_cache", Context.MODE_PRIVATE)
     }
 
+
+    //TODO comment this out
+    /**
+     *
+     */
     private fun cacheUser(user: User) {
         prefs?.edit()?.putString("cached_user", Json.encodeToString(user))?.apply()
     }
 
+
+    //TODO comment this out
+    /**
+     *
+     */
     fun getCachedUser(): User? {
         val json = prefs?.getString("cached_user", null) ?: return null
         return try {
@@ -38,22 +53,37 @@ class UserRepository(private val context: Context? = null) {
         }
     }
 
+
+
+    /**
+     *
+     */
     suspend fun getFollowerCount(): Int {
         return KtorClient.httpClient.get(HttpRoutes.FOLLOWER_COUNT).body()
     }
 
 
+    /**
+     *
+     */
     suspend fun getFollowingCount(): Int {
         return KtorClient.httpClient.get(HttpRoutes.FOLLOWING_COUNT).body()
     }
 
 
+    /**
+     *
+     */
     suspend fun getUser(): User {
         val user = KtorClient.httpClient.get(HttpRoutes.GET_USER).body<User>()
         cacheUser(user)
         return user
     }
 
+
+    /**
+     *
+     */
     suspend fun getUserById(userId: Int): User {
         return KtorClient.httpClient.get(HttpRoutes.PROFILE) {
             parameter("userId", userId)
@@ -85,54 +115,90 @@ class UserRepository(private val context: Context? = null) {
         }
     }
 
+
+    /**
+     *
+     */
     suspend fun getFollowers(userId: Int): List<User> {
         return KtorClient.httpClient.get(HttpRoutes.GET_FOLLOWERS) {
             parameter("userId", userId)
         }.body()
     }
 
+
+    /**
+     *
+     */
     suspend fun getFollowing(userId: Int): List<User> {
         return KtorClient.httpClient.get(HttpRoutes.GET_FOLLOWING) {
             parameter("userId", userId)
         }.body()
     }
 
+
+    /**
+     *
+     */
     suspend fun blockUser(userId: Int) {
         KtorClient.httpClient.patch(HttpRoutes.BLOCK_USER) {
             parameter("userID", userId)
         }
     }
 
+
+    /**
+     *
+     */
     suspend fun unblockUser(userId: Int) {
         KtorClient.httpClient.patch(HttpRoutes.UNBLOCK_USER) {
             parameter("userID", userId)
         }
     }
 
+
+    /**
+     *
+     */
     suspend fun isBlocked(userId: Int): Boolean {
         return KtorClient.httpClient.get(HttpRoutes.IS_BLOCKED) {
             parameter("userID", userId)
         }.body()
     }
 
+
+    /**
+     *
+     */
     suspend fun removeFollower(userId: Int) {
         KtorClient.httpClient.patch(HttpRoutes.REMOVE_FOLLOWER) {
             parameter("userID", userId)
         }
     }
 
+
+    /**
+     *
+     */
     suspend fun followUser(userId: Int) {
         KtorClient.httpClient.patch(HttpRoutes.FOLLOW_USER) {
             parameter("userID", userId)
-        }
+        }.body<Unit>()
     }
 
+
+    /**
+     *
+     */
     suspend fun unfollowUser(userId: Int) {
         KtorClient.httpClient.patch(HttpRoutes.UNFOLLOW_USER) {
             parameter("userID", userId)
-        }
+        }.body<Unit>()
     }
 
+
+    /**
+     *
+     */
     suspend fun isFollowing(userId: Int): Boolean {
         return KtorClient.httpClient.get(HttpRoutes.IS_FOLLOWING) {
             parameter("userID", userId)
@@ -146,14 +212,19 @@ class UserRepository(private val context: Context? = null) {
      */
     suspend fun deleteUser(): Boolean {
         return try {
-            val response: HttpResponse = KtorClient.httpClient.post(HttpRoutes.DELETE_USER)
-            response.status.isSuccess()
+            KtorClient.httpClient.post(HttpRoutes.DELETE_USER).body<Unit>()
+            KtorClient.resetClient()
+            true
         } catch (e: Exception) {
             e.printStackTrace()
             false
         }
     }
 
+
+    /**
+     *
+     */
     suspend fun updateProfilePicture(imageBytes: ByteArray, mimeType: String): Boolean {
         return try {
             val response: HttpResponse = KtorClient.httpClient.put(HttpRoutes.UPDATE_PROFILE_PICTURE) {
