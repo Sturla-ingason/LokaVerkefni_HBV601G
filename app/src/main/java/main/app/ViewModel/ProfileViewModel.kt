@@ -15,7 +15,7 @@ import main.app.repository.UserRepository
 
 class ProfileViewModel : ViewModel() {
 
-    private val postRepository = PostRepository()
+    private var postRepository = PostRepository()
     private var userRepository = UserRepository()
 
     private val _posts = MutableStateFlow<List<Post>>(emptyList())
@@ -38,6 +38,7 @@ class ProfileViewModel : ViewModel() {
 
     fun init(context: Context) {
         userRepository = UserRepository(context)
+        postRepository = PostRepository(context)
     }
 
     fun loadPosts(userId: Int?) {
@@ -47,6 +48,13 @@ class ProfileViewModel : ViewModel() {
                                else postRepository.getPostByUser()
             } catch (e: Exception) {
                 e.printStackTrace()
+                if (userId == null) {
+                    val cached = postRepository.getCachedPosts()
+                    if (cached != null) {
+                        _posts.value = cached
+                        _isOffline.value = true
+                    }
+                }
             }
         }
     }

@@ -1,5 +1,6 @@
 package main.app.repository
 
+import android.content.Context
 import io.ktor.client.call.body
 import io.ktor.client.request.forms.MultiPartFormDataContent
 import io.ktor.client.request.forms.formData
@@ -12,20 +13,41 @@ import io.ktor.client.request.put
 import io.ktor.client.request.setBody
 import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import main.app.apiConnections.HttpRoutes
 import main.app.apiConnections.KtorClient
 import main.app.dataModel.Post
 import main.app.dataModel.User
 
-class PostRepository {
+class PostRepository(private val context: Context? = null) {
+
+    private val prefs by lazy {
+        context?.getSharedPreferences("post_cache", Context.MODE_PRIVATE)
+    }
+
+    private fun cachePosts(posts: List<Post>) {
+        prefs?.edit()?.putString("cached_own_posts", Json.encodeToString(posts))?.apply()
+    }
+
+    fun getCachedPosts(): List<Post>? {
+        val json = prefs?.getString("cached_own_posts", null) ?: return null
+        return try {
+            Json { ignoreUnknownKeys = true }.decodeFromString(json)
+        } catch (e: Exception) {
+            null
+        }
+    }
     suspend fun getPosts(): List<Post> {
         return KtorClient.httpClient.get(HttpRoutes.GET_FEED).body<List<Post>>()
             .sortedByDescending { it.postID }
     }
 
     suspend fun getPostByUser(): List<Post> {
-        return KtorClient.httpClient.get(HttpRoutes.GET_USERS_POSTS).body<List<Post>>()
+        val posts = KtorClient.httpClient.get(HttpRoutes.GET_USERS_POSTS).body<List<Post>>()
             .sortedByDescending { it.postID }
+        cachePosts(posts)
+        return posts
     }
 
     suspend fun likePost(postId: Int) {
