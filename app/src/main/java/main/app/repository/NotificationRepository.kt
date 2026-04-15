@@ -10,14 +10,26 @@ import main.app.dataModel.Notification
 
 class NotificationRepository {
 
+    /**
+     * Get's all the notification for a user form the API
+     */
     suspend fun getNotifications(): List<Notification> {
         return KtorClient.httpClient.get(HttpRoutes.GET_NOTIFICATIONS).body()
     }
 
+
+    /**
+     * get's all the unread notificaitons from the API
+     */
     suspend fun getUnreadCount(): Int {
         return KtorClient.httpClient.get(HttpRoutes.GET_UNREAD_COUNT).body()
     }
 
+
+    /**
+     * Marks a notificaiton as read
+     * @param notificationId the id of the notification to mark
+     */
     suspend fun markAsRead(notificationId: Int) {
         KtorClient.httpClient.post(HttpRoutes.MARK_NOTIFICATION_READ) {
             parameter("notificationId", notificationId)

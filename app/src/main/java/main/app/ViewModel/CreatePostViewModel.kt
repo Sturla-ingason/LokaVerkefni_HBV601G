@@ -21,6 +21,13 @@ class CreatePostViewModel : ViewModel() {
     private val _state = MutableStateFlow<CreatePostState>(CreatePostState.Idle)
     val state: StateFlow<CreatePostState> = _state
 
+    //TODO finish commenting this out
+    /**
+     * Allows a user to create a new post
+     * @param description the text content of the post
+     * @param imageBytes the byte array of a image if it is added
+     * @param mimeType
+     */
     fun createPost(description: String, imageBytes: ByteArray?, mimeType: String?) {
         viewModelScope.launch {
             _state.value = CreatePostState.Loading
@@ -34,6 +41,10 @@ class CreatePostViewModel : ViewModel() {
         }
     }
 
+
+    /**
+     * Resets the state of the fragment after a post has been created
+     */
     fun resetState() {
         _state.value = CreatePostState.Idle
     }

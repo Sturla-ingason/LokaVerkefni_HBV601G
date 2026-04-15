@@ -36,11 +36,21 @@ class ProfileViewModel : ViewModel() {
     private val _error = MutableSharedFlow<String>()
     val error: SharedFlow<String> = _error
 
+
+    /**
+     *
+     */
     fun init(context: Context) {
         userRepository = UserRepository(context)
         postRepository = PostRepository(context)
     }
 
+
+    /**
+     * Get's the posts that the user has posted. if the user is offline they get the cached
+     * userpost instead
+     * @param userId The id of the user to get the post's for
+     */
     fun loadPosts(userId: Int?) {
         viewModelScope.launch {
             try {
@@ -50,7 +60,7 @@ class ProfileViewModel : ViewModel() {
                 e.printStackTrace()
                 if (userId == null) {
                     val cached = postRepository.getCachedPosts()
-                    if (cached != null) {
+                    if (!cached.isNullOrEmpty()) {
                         _posts.value = cached
                         _isOffline.value = true
                     }
@@ -59,6 +69,11 @@ class ProfileViewModel : ViewModel() {
         }
     }
 
+
+    /**
+     * Load's all the information that is displayed on the user profile page
+     * @param userId the id of the user to load all the information for
+     */
     fun loadProfileData(userId: Int?) {
         viewModelScope.launch {
             try {
@@ -78,6 +93,11 @@ class ProfileViewModel : ViewModel() {
         }
     }
 
+
+    //TODO comment this out
+    /**
+     *
+     */
     fun loadFollowBlockState(userId: Int) {
         viewModelScope.launch {
             try {
@@ -89,6 +109,11 @@ class ProfileViewModel : ViewModel() {
         }
     }
 
+
+    //TODO comment this out
+    /**
+     *
+     */
     fun toggleLike(postId: Int) {
         viewModelScope.launch {
             val post = _posts.value.find { it.postID == postId } ?: return@launch
@@ -108,6 +133,11 @@ class ProfileViewModel : ViewModel() {
         }
     }
 
+
+    //TODO comment this out
+    /**
+     *
+     */
     fun toggleFollow(userId: Int) {
         viewModelScope.launch {
             try {
@@ -121,6 +151,11 @@ class ProfileViewModel : ViewModel() {
         }
     }
 
+
+    //TODO comment this out
+    /**
+     *
+     */
     fun toggleBlock(userId: Int) {
         viewModelScope.launch {
             try {

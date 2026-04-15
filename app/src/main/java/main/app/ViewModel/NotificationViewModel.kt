@@ -20,6 +20,9 @@ class NotificationViewModel : ViewModel() {
     private val _unreadCount = MutableStateFlow(0)
     val unreadCount: StateFlow<Int> = _unreadCount
 
+    /**
+     * Gets all the notifications from the api
+     */
     fun loadNotifications() {
         viewModelScope.launch {
             try {
@@ -30,6 +33,10 @@ class NotificationViewModel : ViewModel() {
         }
     }
 
+
+    /**
+     * Gets all the unread notifications for the user
+     */
     fun loadUnreadCount() {
         viewModelScope.launch {
             try {
@@ -40,6 +47,10 @@ class NotificationViewModel : ViewModel() {
         }
     }
 
+
+    /**
+     * mark all the notifications as read
+     */
     fun markAllAsRead() {
         viewModelScope.launch {
             try {
@@ -55,6 +66,11 @@ class NotificationViewModel : ViewModel() {
         }
     }
 
+
+    /**
+     * marks a single notifications as read
+     * @param the id of the notification to mark as read
+     */
     fun markAsRead(notificationId: Int) {
         viewModelScope.launch {
             try {

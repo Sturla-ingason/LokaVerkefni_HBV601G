@@ -10,19 +10,34 @@ import main.app.apiConnections.KtorClient
 import main.app.dataModel.Comment
 
 class CommentRepository {
+
+    /**
+     * Get's all the comments under a post
+     * @param postId the id of the post to get the comment's from
+     */
     suspend fun getComments(postId: Int): List<Comment> {
         return KtorClient.httpClient.get(HttpRoutes.GET_COMMENTS) {
             parameter("postId", postId)
         }.body()
     }
 
+    /**
+     * Calls the api to create a new comment and save it to the database
+     * @param postId the id of the post to create the comment under
+     * @param text the content of the comment
+     */
     suspend fun createComment(postId: Int, text: String) {
         KtorClient.httpClient.post(HttpRoutes.CREATE_COMMENT) {
             parameter("postId", postId)
             parameter("text", text)
-        }
+        }.body<Unit>()
     }
 
+
+    /**
+     * Calles the api and deletes a comment from the database
+     * @param commentId the id of the comment to delete
+     */
     suspend fun deleteComment(commentId: Int) {
         KtorClient.httpClient.delete(HttpRoutes.DELETE_COMMENT) {
             parameter("commentId", commentId)

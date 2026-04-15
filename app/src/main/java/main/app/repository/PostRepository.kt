@@ -13,31 +13,36 @@ import io.ktor.client.request.put
 import io.ktor.client.request.setBody
 import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 import main.app.apiConnections.HttpRoutes
 import main.app.apiConnections.KtorClient
+import main.app.database.AppDatabase
+import main.app.database.toEntity
+import main.app.database.toPost
 import main.app.dataModel.Post
 import main.app.dataModel.User
 
 class PostRepository(private val context: Context? = null) {
 
-    private val prefs by lazy {
-        context?.getSharedPreferences("post_cache", Context.MODE_PRIVATE)
+    private val postDao by lazy {
+        context?.let { AppDatabase.getDatabase(it).postDao() }
     }
 
-    private fun cachePosts(posts: List<Post>) {
-        prefs?.edit()?.putString("cached_own_posts", Json.encodeToString(posts))?.apply()
-    }
+    private fun currentUserId(): Int? =
+        context?.let { UserRepository(it).getCachedUser()?.userID }
 
-    fun getCachedPosts(): List<Post>? {
-        val json = prefs?.getString("cached_own_posts", null) ?: return null
-        return try {
-            Json { ignoreUnknownKeys = true }.decodeFromString(json)
-        } catch (e: Exception) {
-            null
+    private suspend fun cachePosts(posts: List<Post>) {
+        val userId = currentUserId() ?: return
+        postDao?.let { dao ->
+            dao.deleteAllForUser(userId)
+            dao.insertAll(posts.map { it.toEntity(userId) })
         }
     }
+
+    suspend fun getCachedPosts(): List<Post>? {
+        val userId = currentUserId() ?: return null
+        return postDao?.getPostsForUser(userId)?.map { it.toPost() }?.ifEmpty { null }
+    }
+
     suspend fun getPosts(): List<Post> {
         return KtorClient.httpClient.get(HttpRoutes.GET_FEED).body<List<Post>>()
             .sortedByDescending { it.postID }
