@@ -31,6 +31,10 @@ class SearchFragment : Fragment() {
     private lateinit var adapter: Adapter
     private lateinit var userAdapter: UserAdapter
 
+
+    /**
+     *  creates the fragment and inflates it with the fragment_search view
+     */
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -39,6 +43,13 @@ class SearchFragment : Fragment() {
         return inflater.inflate(R.layout.fragment_search, container, false)
     }
 
+
+    /**
+     * what to do when the view has been created
+     * set's the event listender for Search button
+     * and connects the Adapter and user adapter to make
+     * recycle viewers for both posts and user profile pages
+     */
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -81,6 +92,11 @@ class SearchFragment : Fragment() {
         }
     }
 
+
+    /**
+     * When you click on a profile inn the search it open the
+     * View profile fragment and inflates it with the clicked user data
+     */
     private fun openProfile(userId: Int) {
         parentFragmentManager.beginTransaction()
             .replace(R.id.flFragment, ProfileFragment.newInstance(userId))

@@ -25,6 +25,14 @@ import main.app.ViewModel.CreatePostState
 import main.app.ViewModel.CreatePostViewModel
 import main.app.repository.CameraRepository
 
+/**
+ * Fragment for creating a new post.
+ * Allows the user to write a description and optionally attach a photo,
+ * either taken with the camera or selected from the gallery.
+ * Submits the post via CreatePostViewModel object and navigates to the
+ * profile tab on success.
+ */
+
 class CreatePostFragment : Fragment(R.layout.fragment_create_post) {
 
     private var selectedPhotoUri: Uri? = null
@@ -63,6 +71,14 @@ class CreatePostFragment : Fragment(R.layout.fragment_create_post) {
         }
     }
 
+
+    /**
+     *Called when the fragments use is ready to be used.
+     * Sets the click listener for add-photo and post buttons.
+     *
+     * @param view the root view of the fragment layout
+     * @param savedInstanceState the previously saved state
+     */
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -118,6 +134,11 @@ class CreatePostFragment : Fragment(R.layout.fragment_create_post) {
         }
     }
 
+
+    /**
+     * Shows the dialog for what to do in photos
+     * cancel, import photo or take photo
+     */
     private fun showPhotoDialog() {
         AlertDialog.Builder(requireContext())
             .setTitle("Add Photo")
@@ -131,6 +152,10 @@ class CreatePostFragment : Fragment(R.layout.fragment_create_post) {
             .show()
     }
 
+
+    /**
+     * Checks if the camers permision has been granted
+     */
     private fun checkPermissionAndLaunch() {
         if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA)
             == PackageManager.PERMISSION_GRANTED
@@ -141,6 +166,10 @@ class CreatePostFragment : Fragment(R.layout.fragment_create_post) {
         }
     }
 
+
+    /**
+     * Lunches the camera for the user to take a photo with
+     */
     private fun launchCamera() {
         val uri = cameraRepo.createImageUri()
         pendingImageUri = uri

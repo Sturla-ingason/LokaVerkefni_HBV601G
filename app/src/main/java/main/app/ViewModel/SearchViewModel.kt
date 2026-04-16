@@ -47,7 +47,8 @@ class SearchViewModel : ViewModel() {
 
     //TODO comment this out
     /**
-     *
+     * Allows a user to like or unlike a post.
+     * @param postId id of the post to like or unlike
      */
     fun toggleLike(postId: Int) {
         val current = (_results.value as? SearchResults.Posts)?.posts ?: return

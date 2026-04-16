@@ -94,9 +94,10 @@ class ProfileViewModel : ViewModel() {
     }
 
 
-    //TODO comment this out
     /**
-     *
+     * When we view another users profile we need to know if the current
+     * user is following them and if they are blocked
+     * @param userId id of the user to check on
      */
     fun loadFollowBlockState(userId: Int) {
         viewModelScope.launch {
@@ -110,9 +111,9 @@ class ProfileViewModel : ViewModel() {
     }
 
 
-    //TODO comment this out
     /**
-     *
+     * Allows a user to like a post and unlike a post
+     * @param postId id of the post to like or unlike
      */
     fun toggleLike(postId: Int) {
         viewModelScope.launch {
@@ -134,9 +135,9 @@ class ProfileViewModel : ViewModel() {
     }
 
 
-    //TODO comment this out
     /**
-     *
+     * Allows a user to follow or unfollow another user
+     * @param userId the id of the user to follower or unfollow
      */
     fun toggleFollow(userId: Int) {
         viewModelScope.launch {
@@ -152,9 +153,9 @@ class ProfileViewModel : ViewModel() {
     }
 
 
-    //TODO comment this out
     /**
-     *
+     * Allows a user to block or unblock another user
+     * @param userId the id of the user to block or unblock
      */
     fun toggleBlock(userId: Int) {
         viewModelScope.launch {

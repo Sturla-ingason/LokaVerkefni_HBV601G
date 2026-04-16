@@ -26,6 +26,10 @@ class FollowListFragment : DialogFragment() {
         const val MODE_FOLLOWERS = "Followers"
         const val MODE_FOLLOWING = "Following"
 
+
+        /**
+         *
+         */
         fun newInstance(userId: Int, mode: String, isOwnProfile: Boolean): FollowListFragment {
             val fragment = FollowListFragment()
             val args = Bundle()
@@ -37,6 +41,10 @@ class FollowListFragment : DialogFragment() {
         }
     }
 
+
+    /**
+     * inflates the dialgo with the right view or dilog_follow_list
+     */
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -45,6 +53,10 @@ class FollowListFragment : DialogFragment() {
         return inflater.inflate(R.layout.dialog_follow_list, container, false)
     }
 
+
+    /**
+     * Called when the view is created.
+     */
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -92,11 +104,19 @@ class FollowListFragment : DialogFragment() {
         viewModel.loadList(userId, mode)
     }
 
+
+    /**
+     * Tells us what to do when the dialgo is dismissed
+     */
     override fun onDismiss(dialog: android.content.DialogInterface) {
         super.onDismiss(dialog)
         parentFragmentManager.setFragmentResult("follow_list_dismissed", Bundle())
     }
 
+
+    /**
+     * Starts the dialog
+     */
     override fun onStart() {
         super.onStart()
         dialog?.window?.setLayout(

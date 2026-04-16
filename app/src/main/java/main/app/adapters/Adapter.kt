@@ -23,11 +23,25 @@ class Adapter(
     private val onLikeToggle: (postId: Int) -> Unit
 ): RecyclerView.Adapter<Adapter.ViewHolder>() {
 
+
+    /**
+     * inflates the post view layout inn a viewholder for a recycle view.
+     * A new row inn recycle viewer
+     * @param parent the parent viewgroup object the new view will be attaced to
+     * @param viewType the type of new view it is
+     * @return a new view holder object containing the inflated post view
+     */
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val itemView = LayoutInflater.from(parent.context).inflate(R.layout.post_view, parent, false)
         return ViewHolder(itemView)
     }
 
+
+    /**
+     * Loads all the information of a post into a viewholder and loads the post image
+     * @param ViewHolder the container to be filled with information
+     * @param position where we are inn the list of posts to show
+     */
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val currentItem = postlist[position]
 
@@ -67,15 +81,30 @@ class Adapter(
         }
     }
 
+
+    /**
+     * get the ammount of posts that we need to show
+     * @return a number of how many posts there are
+     */
     override fun getItemCount(): Int {
         return postlist.size
     }
 
+
+    /**
+     * Sets a new postlist and resets the recycle viewer
+     * @param newPosts a list of all the new posts.
+     */
     fun updateData(newPosts: List<Post>) {
         postlist = newPosts
         notifyDataSetChanged()
     }
 
+
+    /**
+     * Creates the container for each element of the recycle view holder.
+     * @param itemView
+     */
     class ViewHolder(itemView: View): RecyclerView.ViewHolder(itemView){
         val title = itemView.findViewById<TextView>(R.id.postTitle)
         val body = itemView.findViewById<TextView>(R.id.postBody)

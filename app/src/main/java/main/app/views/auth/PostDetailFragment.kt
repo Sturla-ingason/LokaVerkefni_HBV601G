@@ -49,11 +49,20 @@ class PostDetailFragment : DialogFragment() {
         }
     }
 
+
+    /**
+     *
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         post = arguments?.getSerializable("post") as Post
     }
 
+
+    /**
+     * creates the dialog and inflates it with the right view inn this case
+     * the dialog_post_detail
+     */
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -62,6 +71,12 @@ class PostDetailFragment : DialogFragment() {
         return inflater.inflate(R.layout.dialog_post_detail, container, false)
     }
 
+
+    /**
+     * What to do when the view has been created and ready.
+     * Sets the event handler for add comment, like button, close button, edit button
+     * and the like count text.
+     */
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -209,6 +224,11 @@ class PostDetailFragment : DialogFragment() {
         post.postID?.let { viewModel.loadComments(it) }
     }
 
+
+    /**
+     * Show what user have liked the post.
+     * @param likedUsers list of users that have liked this post
+     */
     private fun showLikesDialog(likedUsers: List<User>) {
         if (likedUsers.isEmpty()) {
             Toast.makeText(context, "No likes yet", Toast.LENGTH_SHORT).show()
@@ -227,11 +247,19 @@ class PostDetailFragment : DialogFragment() {
         recyclerView.adapter = UserAdapter(likedUsers) { }
     }
 
+
+    /**
+     * What to do when the dialog is dismissed
+     */
     override fun onDismiss(dialog: android.content.DialogInterface) {
         super.onDismiss(dialog)
         parentFragmentManager.setFragmentResult("post_detail_dismissed", Bundle())
     }
 
+
+    /**
+     * What to do when the dialog is started
+     */
     override fun onStart() {
         super.onStart()
         dialog?.window?.setLayout(

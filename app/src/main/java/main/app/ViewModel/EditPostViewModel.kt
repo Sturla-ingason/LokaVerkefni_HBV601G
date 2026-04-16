@@ -82,21 +82,24 @@ class EditPostViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
-    //TODO finish commenting this out
+
     /**
-     *
+     * Resets the save resault back to null when it is done handeling it
+     * so we do not get a retriger when we create the fragment again
      */
     fun clearSaveResult() { _saveResult.value = null }
 
-    //TODO finish commenting this out
+
     /**
-     *
+     * Clears the delete resault back to null when it is done handeling it
+     * so that we dont get it again when we create the fragment
      */
     fun clearDeleteComplete() { _deleteComplete.value = null }
 
-    //TODO finish commenting this out
+
     /**
-     *
+     * clear the error back to null so that we dont get a retrigger
+     * of it when we create the fragment again.
      */
     fun clearError() { _error.value = null }
 }

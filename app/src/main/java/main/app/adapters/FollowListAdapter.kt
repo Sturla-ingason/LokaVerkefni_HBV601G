@@ -20,23 +20,43 @@ class FollowListAdapter(
     private val onActionClick: (User, Button) -> Unit
 ) : RecyclerView.Adapter<FollowListAdapter.ViewHolder>() {
 
+
+    /**
+     *
+     */
     companion object {
         const val MODE_FOLLOWERS = "Followers"
         const val MODE_FOLLOWING = "Following"
     }
 
+
+    /**
+     * Container for the data for the recycle viewer
+     * @param view the view that is used inn the viewholder
+     */
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val picture: ImageView = view.findViewById(R.id.followListItemPicture)
         val username: TextView = view.findViewById(R.id.followListItemUsername)
         val actionButton: Button = view.findViewById(R.id.followListItemActionButton)
     }
 
+
+    /**
+     * infaltes a new viewholder with a view for the recycle viewer
+     * a new row for the recycle viewer
+     * @param parent what view to use
+     * @param viewType what view it is
+     */
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.follow_list_item, parent, false)
         return ViewHolder(view)
     }
 
+
+    /**
+     * Shows all the user viewholders that are available and shows them
+     */
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val user = users[position]
         holder.username.text = user.username
@@ -57,8 +77,16 @@ class FollowListAdapter(
         holder.itemView.setOnClickListener { onUsernameClick(user) }
     }
 
+
+    /**
+     * Get the ammount of users that we have to handle
+     */
     override fun getItemCount() = users.size
 
+
+    /**
+     * removes a user from the list
+     */
     fun removeUser(user: User) {
         val index = users.indexOfFirst { it.userID == user.userID }
         if (index != -1) {
@@ -67,6 +95,11 @@ class FollowListAdapter(
         }
     }
 
+
+    /**
+     * updated the data of the user list
+     * @param new user list data
+     */
     fun updateData(newUsers: List<User>) {
         users = newUsers.toMutableList()
         notifyDataSetChanged()

@@ -5,6 +5,11 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import main.app.dataModel.Comment
 
+/**
+ * Converter functions, tells room how to convert complex types
+ * into primitive ones and the reverse.
+ */
+
 class Converters {
     private val json = Json { ignoreUnknownKeys = true }
 
