@@ -15,11 +15,22 @@ class CommentAdapter(
     private val onDelete: ((commentId: Int) -> Unit)? = null
 ) : RecyclerView.Adapter<CommentAdapter.ViewHolder>() {
 
+
+    /**
+     * Creates a new viewholder that we can use to show a new line in the recycle viewer
+     * @return View holder object inflated with the comment view
+     */
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val itemView = LayoutInflater.from(parent.context).inflate(R.layout.comment_view, parent, false)
         return ViewHolder(itemView)
     }
 
+
+    /**
+     * Creates and shows all the viewholder objects inn the recycle viewer
+     * @param ViewHolder the container to populate with data
+     * @param position where we are inn the comment array/ which comment to display next
+     */
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val currentItem = commentList[position]
         holder.username.text = currentItem.username ?: "User #${currentItem.userId ?: "Unknown"}"
@@ -36,18 +47,37 @@ class CommentAdapter(
         }
     }
 
+
+    /**
+     *  get the ammount of comments on a post that we need to show
+     */
     override fun getItemCount(): Int = commentList.size
 
+
+    /**
+     * updateds the data of the comments
+     * @param newComments the new comment data
+     */
     fun updateData(newComments: List<Comment>) {
         commentList = newComments
         notifyDataSetChanged()
     }
 
+
+
+    /**
+     * Allows the adapter to keep track of the current user id
+     * @param userId the id of the user
+     */
     fun setCurrentUserId(userId: Int?) {
         currentUserId = userId
         notifyDataSetChanged()
     }
 
+
+    /**
+     * Container for each element inn the recycle viewer
+     */
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val username: TextView = itemView.findViewById(R.id.userNameCommenter)
         val body: TextView = itemView.findViewById(R.id.comment)

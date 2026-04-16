@@ -23,13 +23,24 @@ import main.app.dataModel.User
 
 class PostRepository(private val context: Context? = null) {
 
+
+    /**
+     * Post data acces object
+     */
     private val postDao by lazy {
         context?.let { AppDatabase.getDatabase(it).postDao() }
     }
 
+    /**
+     * Adds a user id when we cach data so users dont see each others cashed data.
+     */
     private fun currentUserId(): Int? =
         context?.let { UserRepository(it).getCachedUser()?.userID }
 
+
+    /**
+     * caches all the posts of the user inn the local dtabase
+     */
     private suspend fun cachePosts(posts: List<Post>) {
         val userId = currentUserId() ?: return
         postDao?.let { dao ->
@@ -38,16 +49,31 @@ class PostRepository(private val context: Context? = null) {
         }
     }
 
+
+    /**
+     * Gets all the cached posts by a user (the user has to be logged inn)
+     */
     suspend fun getCachedPosts(): List<Post>? {
         val userId = currentUserId() ?: return null
         return postDao?.getPostsForUser(userId)?.map { it.toPost() }?.ifEmpty { null }
     }
 
+
+    /**
+     * Get's the posts for the feed and sorts them inn decending order by time.
+     * So get's all posts from users that the logged inn user is following.
+     * @return a list of posts from the followed users.
+     */
     suspend fun getPosts(): List<Post> {
         return KtorClient.httpClient.get(HttpRoutes.GET_FEED).body<List<Post>>()
             .sortedByDescending { it.postID }
     }
 
+
+    /**
+     * Gets all the posts from a user. Also caches them to be seen offline
+     * @return list of users posts.
+     */
     suspend fun getPostByUser(): List<Post> {
         val posts = KtorClient.httpClient.get(HttpRoutes.GET_USERS_POSTS).body<List<Post>>()
             .sortedByDescending { it.postID }
@@ -55,18 +81,34 @@ class PostRepository(private val context: Context? = null) {
         return posts
     }
 
+
+    /**
+     * Updates the like counter on a post when a user likes a post
+     * @param postId the id of the post to update the likes on
+     */
     suspend fun likePost(postId: Int) {
         KtorClient.httpClient.post(HttpRoutes.LIKE_POST) {
             parameter("postId", postId)
         }
     }
 
+
+    /**
+     * Updates the like count when a user unlikes a post
+     * @param postId the id of the post to update the like counter on
+     */
     suspend fun unlikePost(postId: Int) {
         KtorClient.httpClient.patch(HttpRoutes.UNLIKE_POST) {
             parameter("postId", postId)
         }
     }
 
+
+    /**
+     * Get a list of users that have liked the post
+     * @param postId id of the post to get the list from
+     * @return list of users that have liked the post
+     */
     suspend fun getLikes(postId: Int): List<User> {
         return try {
             KtorClient.httpClient.get(HttpRoutes.GET_LIKES) {
@@ -78,6 +120,13 @@ class PostRepository(private val context: Context? = null) {
         }
     }
 
+
+    /**
+     * Allows a user to create a new post
+     * @param description the string content of the post
+     * @param imageBytes the raw data of the image
+     * @param mimeType the format the images is inn for example jpeg
+     */
     suspend fun createPost(description: String, imageBytes: ByteArray?, mimeType: String?): Post {
         return KtorClient.httpClient.post(HttpRoutes.CREATE_POST) {
             setBody(MultiPartFormDataContent(
@@ -94,12 +143,26 @@ class PostRepository(private val context: Context? = null) {
         }.body()
     }
 
+
+    /**
+     * Allows a user to delete a post that they have created
+     * @param postId id of the post to delete
+     */
     suspend fun deletePost(postId: Int) {
         KtorClient.httpClient.delete(HttpRoutes.DELETE_POST) {
             parameter("postID", postId)
         }
     }
 
+
+    /**
+     * Allows a user to edit a post that they have already created
+     * @param postId the id of the post to edit
+     * @param description the text content of the post
+     * @param removeImageIds the id's of the images to remove from the posts.
+     * @param imageBytes the raw data of the image
+     * @param mimeType the format of the image.
+     */
     suspend fun editPost(
         postId: Int,
         description: String,
@@ -128,6 +191,11 @@ class PostRepository(private val context: Context? = null) {
         }
     }
 
+
+    /**
+     * Get a post by a user id
+     * @param userId the user id to get a post by
+     */
     suspend fun getPostsByUserId(userId: Int): List<Post> {
         return KtorClient.httpClient.get(HttpRoutes.GET_PROFILE_POSTS) {
             parameter("userId", userId)

@@ -14,11 +14,20 @@ class NotificationAdapter(
     private val onNotificationClick: (Notification) -> Unit
 ) : RecyclerView.Adapter<NotificationAdapter.ViewHolder>() {
 
+
+    /**
+     * creates a new viewholder and infaltes it with the notificaiont item view.
+     * @return viewholder object
+     */
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.notification_item, parent, false)
         return ViewHolder(view)
     }
 
+
+    /**
+     * Shows the all the notifications inn the recycle view with the view holders containers
+     */
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val notification = notifications[position]
 
@@ -40,13 +49,27 @@ class NotificationAdapter(
         }
     }
 
+
+    /**
+     * gets the amount of notifications that we have to show
+     */
     override fun getItemCount() = notifications.size
 
+
+    /**
+     * updates the notification data with new inoformation
+     * @param newNotifications the new notificaiton data.
+     */
     fun updateData(newNotifications: List<Notification>) {
         notifications = newNotifications
         notifyDataSetChanged()
     }
 
+
+
+    /**
+     * the container for the recycle viewer. each element.
+     */
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val message: TextView = itemView.findViewById(R.id.notificationMessage)
         val unreadDot: View = itemView.findViewById(R.id.unreadDot)
