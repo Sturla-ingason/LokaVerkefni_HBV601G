@@ -120,7 +120,9 @@ class CommentFragment : DialogFragment() {
         }
     }
 
-
+    /**
+     * Tells the system what to do when the comment dialog is dismissed
+     */
     override fun onDismiss(dialog: android.content.DialogInterface) {
         super.onDismiss(dialog)
         parentFragmentManager.setFragmentResult("comment_dismissed", Bundle())

@@ -28,6 +28,10 @@ class SettingsFragment : Fragment() {
     private var originalBio: String = ""
     private var selectedImageUri: Uri? = null
 
+
+    /**
+     * 
+     */
     private val pickProfileImage =
         registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
             uri ?: return@registerForActivityResult

@@ -31,7 +31,7 @@ class CommentViewModel : ViewModel() {
 
     //TODO comment out this function
     /**
-     *
+     * Allows us to keep track of the current user id of the logged inn user
      */
     init {
         viewModelScope.launch {

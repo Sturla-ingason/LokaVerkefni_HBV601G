@@ -37,7 +37,8 @@ class LoginFragment : Fragment() {
 
 
     /**
-     *
+     * What to do when the view is created
+     * sets the event handler for dontHaveAccountButton and LogInnButton
      */
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -82,7 +83,7 @@ class LoginFragment : Fragment() {
 
 
     /**
-     *
+     * What to do when the view is destroyed
      */
     override fun onDestroyView() {
         super.onDestroyView()

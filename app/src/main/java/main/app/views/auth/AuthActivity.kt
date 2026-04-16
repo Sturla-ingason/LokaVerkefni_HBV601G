@@ -13,6 +13,11 @@ import main.app.ViewModel.NotificationViewModel
 
 class AuthActivity : AppCompatActivity(){
 
+    /**
+     * Called when the activity is created, sets upp the bottom
+     * navigation and observes the notifications count to show
+     * the notification badge or not
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -50,6 +55,13 @@ class AuthActivity : AppCompatActivity(){
         }
     }
 
+
+    /**
+     * Replaces the current fragment in the main container with the given fragment
+     * used to switch between fragments that the bottom navigation selects
+     *
+     * @param fragment the fragment to dispaly inn the main container
+     */
     private fun setCurrentFragment(fragment: Fragment){
         supportFragmentManager.beginTransaction()
             .replace(R.id.flFragment, fragment)

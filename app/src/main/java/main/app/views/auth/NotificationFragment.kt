@@ -21,6 +21,11 @@ class NotificationFragment : Fragment() {
     private val viewModel: NotificationViewModel by activityViewModels()
     private lateinit var adapter: NotificationAdapter
 
+
+    /**
+     * inflats the fragment with the right view inn this case the
+     * fragment_notification view
+     */
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -28,6 +33,11 @@ class NotificationFragment : Fragment() {
         return inflater.inflate(R.layout.fragment_notifications, container, false)
     }
 
+
+    /**
+     * Creates a new recycle viewer with the notification adapter and sets
+     * the onclick listener for the markAllReadButton for the notifications.
+     */
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 

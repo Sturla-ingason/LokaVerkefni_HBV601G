@@ -47,7 +47,7 @@ class ProfileFragment : Fragment() {
 
 
     /**
-     *
+     * creates the fragment and inflates it with the profile fragment view
      */
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -198,16 +198,31 @@ class ProfileFragment : Fragment() {
         viewModel.loadProfileData(targetUserId)
     }
 
+
+    /**
+     *  Allows us to refresh the posts inn the user profile
+     *  fragment.
+     */
     fun refreshPosts() {
         viewModel.loadPosts(targetUserId)
     }
 
+
+    /**
+     * What to do when the fragment starts again
+     * we reload the post for the user page
+     */
     override fun onResume() {
         super.onResume()
         // Reload posts every time the fragment becomes visible so new posts appear immediately
         viewModel.loadPosts(targetUserId)
     }
 
+
+    /**
+     * Destroys the view and sets binding to null
+     * so that it is not connected to anything
+     */
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
