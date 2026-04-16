@@ -22,7 +22,7 @@ import main.app.apiConnections.HttpRoutes
 class EditPostFragment : DialogFragment() {
 
     private val viewModel: EditPostViewModel by viewModels()
-    private var onPostEdited: ((String) -> Unit)? = null
+    private var onPostEdited: ((String, List<Long>?) -> Unit)? = null
     private var onPostDeleted: (() -> Unit)? = null
 
     // Image state — kept in the fragment since it comes from user interaction and the gallery picker
@@ -59,7 +59,7 @@ class EditPostFragment : DialogFragment() {
             postId: Int,
             currentDescription: String,
             imageIds: List<Long>?,
-            onEdited: (String) -> Unit,
+            onEdited: (String, List<Long>?) -> Unit,
             onDeleted: () -> Unit = {}
         ): EditPostFragment {
             val fragment = EditPostFragment()
@@ -124,10 +124,10 @@ class EditPostFragment : DialogFragment() {
         }
 
         // Observe save result
-        viewModel.saveResult.observe(viewLifecycleOwner) { updatedDescription ->
-            updatedDescription ?: return@observe
+        viewModel.saveResult.observe(viewLifecycleOwner) { updatedPost ->
+            updatedPost ?: return@observe
             viewModel.clearSaveResult()
-            onPostEdited?.invoke(updatedDescription)
+            onPostEdited?.invoke(updatedPost.description ?: "", updatedPost.imageIds)
             dismiss()
         }
 
@@ -175,7 +175,7 @@ class EditPostFragment : DialogFragment() {
                 return@setOnClickListener
             }
             saveButton.isEnabled = false
-            val removeIds = if (removeExistingImage && existingImageId != null) {
+            val removeIds = if ((removeExistingImage || newImageUri != null) && existingImageId != null) {
                 listOf(existingImageId!!)
             } else null
             viewModel.savePost(postId, newDescription, removeIds, newImageUri)

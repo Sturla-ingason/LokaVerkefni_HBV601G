@@ -109,7 +109,18 @@ class PostDetailFragment : DialogFragment() {
                 postId = postId,
                 currentDescription = descriptionText.text.toString(),
                 imageIds = post.imageIds,
-                onEdited = { updatedDescription -> descriptionText.text = updatedDescription },
+                onEdited = { updatedDescription, updatedImageIds ->
+                    descriptionText.text = updatedDescription
+                    if (updatedImageIds.isNullOrEmpty()) {
+                        detailImage.visibility = View.GONE
+                    } else {
+                        detailImage.visibility = View.VISIBLE
+                        Glide.with(this)
+                            .load("${HttpRoutes.GET_IMAGE}/${updatedImageIds[0]}")
+                            .placeholder(android.R.drawable.ic_menu_gallery)
+                            .into(detailImage)
+                    }
+                },
                 onDeleted = {
                     (parentFragment as? ProfileFragment)?.refreshPosts()
                     dismiss() }

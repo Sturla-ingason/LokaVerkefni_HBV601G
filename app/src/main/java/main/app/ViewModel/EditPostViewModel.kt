@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import main.app.dataModel.Post
 import main.app.repository.PostRepository
 
 
@@ -17,8 +18,8 @@ class EditPostViewModel(application: Application) : AndroidViewModel(application
     private val postRepository = PostRepository()
 
 
-    private val _saveResult = MutableLiveData<String?>()
-    val saveResult: LiveData<String?> = _saveResult
+    private val _saveResult = MutableLiveData<Post?>()
+    val saveResult: LiveData<Post?> = _saveResult
 
 
     private val _deleteComplete = MutableLiveData<Boolean?>()
@@ -55,7 +56,7 @@ class EditPostViewModel(application: Application) : AndroidViewModel(application
                 val updatedPost = withContext(Dispatchers.IO) {
                     postRepository.editPost(postId, description, removeImageIds, imageBytes, mimeType)
                 }
-                _saveResult.value = updatedPost.description ?: description
+                _saveResult.value = updatedPost
             } catch (e: Exception) {
                 e.printStackTrace()
                 _error.value = "Failed to save changes"
