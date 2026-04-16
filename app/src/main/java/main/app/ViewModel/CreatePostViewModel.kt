@@ -21,12 +21,11 @@ class CreatePostViewModel : ViewModel() {
     private val _state = MutableStateFlow<CreatePostState>(CreatePostState.Idle)
     val state: StateFlow<CreatePostState> = _state
 
-    //TODO finish commenting this out
     /**
      * Allows a user to create a new post
      * @param description the text content of the post
-     * @param imageBytes the byte array of a image if it is added
-     * @param mimeType
+     * @param imageBytes the raw data of the image to be added
+     * @param mimeType the file type of the image such as jpeg
      */
     fun createPost(description: String, imageBytes: ByteArray?, mimeType: String?) {
         viewModelScope.launch {

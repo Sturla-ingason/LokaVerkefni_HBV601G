@@ -28,9 +28,10 @@ class HomeViewModel : ViewModel() {
         }
     }
 
-    //TODO finish commenting this out
+
     /**
-     *
+     * Allows a user to like or unlike a post
+     * @param postId the id of the post to like
      */
     fun toggleLike(postId: Int) {
         viewModelScope.launch {

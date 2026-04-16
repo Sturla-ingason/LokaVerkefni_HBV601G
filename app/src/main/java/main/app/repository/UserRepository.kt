@@ -22,27 +22,26 @@ import kotlinx.serialization.json.Json
 
 class UserRepository(private val context: Context? = null) {
 
-    //TODO comment this out
     /**
-     *
+     * Gets a sharedprefrence instance named user_cache that only the app can use
      */
     private val prefs by lazy {
         context?.getSharedPreferences("user_cache", Context.MODE_PRIVATE)
     }
 
 
-    //TODO comment this out
     /**
-     *
+     * stores a given user inn shared prefrences to be view offline.
+     * @param user the user object to store.
      */
     private fun cacheUser(user: User) {
         prefs?.edit()?.putString("cached_user", Json.encodeToString(user))?.apply()
     }
 
 
-    //TODO comment this out
     /**
-     *
+     * Gets the cached user data and returns it as a user object that can be used to fill information
+     * @return the cached user, if there is no user cached return null
      */
     fun getCachedUser(): User? {
         val json = prefs?.getString("cached_user", null) ?: return null
@@ -56,7 +55,8 @@ class UserRepository(private val context: Context? = null) {
 
 
     /**
-     *
+     * Allows us to get the follower count of a user
+     * @return int count of followers
      */
     suspend fun getFollowerCount(): Int {
         return KtorClient.httpClient.get(HttpRoutes.FOLLOWER_COUNT).body()
@@ -64,7 +64,8 @@ class UserRepository(private val context: Context? = null) {
 
 
     /**
-     *
+     * Gets the number of users following the logged inn user
+     * @param int count amount of users that are folliwng the user
      */
     suspend fun getFollowingCount(): Int {
         return KtorClient.httpClient.get(HttpRoutes.FOLLOWING_COUNT).body()
@@ -72,7 +73,8 @@ class UserRepository(private val context: Context? = null) {
 
 
     /**
-     *
+     * Allows us to get the information for the current user and caches it.
+     * @return user object of the current user
      */
     suspend fun getUser(): User {
         val user = KtorClient.httpClient.get(HttpRoutes.GET_USER).body<User>()
@@ -82,7 +84,9 @@ class UserRepository(private val context: Context? = null) {
 
 
     /**
-     *
+     * Allows us to find a user by userId
+     * @param userId the id of the user to find
+     * @return user object of the found user
      */
     suspend fun getUserById(userId: Int): User {
         return KtorClient.httpClient.get(HttpRoutes.PROFILE) {
@@ -117,7 +121,9 @@ class UserRepository(private val context: Context? = null) {
 
 
     /**
-     *
+     * Allows us to get all the users that are following another user
+     * @param userId id of the user we want to get the followers of
+     * @return list of users that are following the user
      */
     suspend fun getFollowers(userId: Int): List<User> {
         return KtorClient.httpClient.get(HttpRoutes.GET_FOLLOWERS) {
@@ -127,7 +133,9 @@ class UserRepository(private val context: Context? = null) {
 
 
     /**
-     *
+     * Allows us to get all the users that a user is following
+     * @param userId id of the user we want to get the list for
+     * @return a list of users that a user is following
      */
     suspend fun getFollowing(userId: Int): List<User> {
         return KtorClient.httpClient.get(HttpRoutes.GET_FOLLOWING) {
@@ -137,7 +145,8 @@ class UserRepository(private val context: Context? = null) {
 
 
     /**
-     *
+     * Allows another user to block another user.
+     * @param userId id of the user to be blocked
      */
     suspend fun blockUser(userId: Int) {
         KtorClient.httpClient.patch(HttpRoutes.BLOCK_USER) {
@@ -147,7 +156,8 @@ class UserRepository(private val context: Context? = null) {
 
 
     /**
-     *
+     * Allows a user to unblock another user
+     * @param userId id of the user to unblock
      */
     suspend fun unblockUser(userId: Int) {
         KtorClient.httpClient.patch(HttpRoutes.UNBLOCK_USER) {
@@ -157,7 +167,9 @@ class UserRepository(private val context: Context? = null) {
 
 
     /**
-     *
+     *  Checks if a user is blocked by the current user
+     *  @param userId id of the user to check if he is blocked or not
+     *  @return true or false depending on if the user is blcoked or not
      */
     suspend fun isBlocked(userId: Int): Boolean {
         return KtorClient.httpClient.get(HttpRoutes.IS_BLOCKED) {
@@ -167,7 +179,8 @@ class UserRepository(private val context: Context? = null) {
 
 
     /**
-     *
+     * Allows the active user to remove a follower from their account
+     * @param userId the id of the user to be removed
      */
     suspend fun removeFollower(userId: Int) {
         KtorClient.httpClient.patch(HttpRoutes.REMOVE_FOLLOWER) {
@@ -177,7 +190,8 @@ class UserRepository(private val context: Context? = null) {
 
 
     /**
-     *
+     * Allows the active user to follow another user
+     * @param userId the id of the user to follow
      */
     suspend fun followUser(userId: Int) {
         KtorClient.httpClient.patch(HttpRoutes.FOLLOW_USER) {
@@ -187,7 +201,8 @@ class UserRepository(private val context: Context? = null) {
 
 
     /**
-     *
+     *  Allows the active user to unfollow another user
+     *  @param userId id of the user to unfollow
      */
     suspend fun unfollowUser(userId: Int) {
         KtorClient.httpClient.patch(HttpRoutes.UNFOLLOW_USER) {
@@ -197,7 +212,9 @@ class UserRepository(private val context: Context? = null) {
 
 
     /**
-     *
+     * Allows us to check if the current user is following another usre
+     * @param userId the id of the user to check on
+     * @return true or false depending of if the user is followed or not
      */
     suspend fun isFollowing(userId: Int): Boolean {
         return KtorClient.httpClient.get(HttpRoutes.IS_FOLLOWING) {
@@ -223,7 +240,9 @@ class UserRepository(private val context: Context? = null) {
 
 
     /**
-     *
+     * Allows the user to update their user profile pick
+     * @param imageBytes the raw data of the image.
+     * @param mimeType the format or type of the image for example jpeg
      */
     suspend fun updateProfilePicture(imageBytes: ByteArray, mimeType: String): Boolean {
         return try {

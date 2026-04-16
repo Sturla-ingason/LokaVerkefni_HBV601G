@@ -14,6 +14,7 @@ class CommentRepository {
     /**
      * Get's all the comments under a post
      * @param postId the id of the post to get the comment's from
+     * @return a list of comments under a post
      */
     suspend fun getComments(postId: Int): List<Comment> {
         return KtorClient.httpClient.get(HttpRoutes.GET_COMMENTS) {

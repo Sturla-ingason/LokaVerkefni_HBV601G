@@ -33,7 +33,7 @@ class HomePage : Fragment() {
 
 
     /**
-     * Sets upp the recicle viewer for the posts.
+     * Sets upp the recicle viewer for the posts with the adapter.
      */
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)

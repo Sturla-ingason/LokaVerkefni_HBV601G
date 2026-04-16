@@ -12,6 +12,7 @@ class NotificationRepository {
 
     /**
      * Get's all the notification for a user form the API
+     * @return a list of notifications
      */
     suspend fun getNotifications(): List<Notification> {
         return KtorClient.httpClient.get(HttpRoutes.GET_NOTIFICATIONS).body()
@@ -20,6 +21,7 @@ class NotificationRepository {
 
     /**
      * get's all the unread notificaitons from the API
+     * @return number of unread notifications
      */
     suspend fun getUnreadCount(): Int {
         return KtorClient.httpClient.get(HttpRoutes.GET_UNREAD_COUNT).body()

@@ -52,9 +52,11 @@ class PostDetailViewModel : ViewModel() {
     }
 
 
-    //TODO comment this out
     /**
-     *
+     * when we enter the view this initates the isliked value
+     * and the likecount value
+     * @param liked true if liked and false if not
+     * @param count the number of likes on the post
      */
     fun initLikeState(liked: Boolean, count: Int) {
         _isLiked.value = liked
@@ -62,9 +64,9 @@ class PostDetailViewModel : ViewModel() {
     }
 
 
-    //TODO comment this out
     /**
-     *
+     * Allows a user to like or unlike a post
+     * @param postId id of the post to like or unlike
      */
     fun toggleLike(postId: Int) {
         viewModelScope.launch {
@@ -84,6 +86,7 @@ class PostDetailViewModel : ViewModel() {
     //TODO comment this out
     /**
      * Shows the edit button for the posts that the user owns
+     * @param postUserId the user id of the post that we are checking for
      */
     fun checkEditButton(postUserId: Int?) {
         viewModelScope.launch {
@@ -117,7 +120,8 @@ class PostDetailViewModel : ViewModel() {
 
     //TODO comment this out
     /**
-     *
+     * Allows us to show all users that have liked the post
+     * @param postId id of the post to get the list for
      */
     fun loadLikes(postId: Int) {
         viewModelScope.launch {
@@ -133,7 +137,8 @@ class PostDetailViewModel : ViewModel() {
 
     //TODO comment this out
     /**
-     *
+     * Allows us to load all the comments for a given post
+     * @param postId id of the post to load the comments for
      */
     fun loadComments(postId: Int) {
         viewModelScope.launch {

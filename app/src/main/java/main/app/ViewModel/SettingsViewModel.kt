@@ -35,9 +35,10 @@ class SettingsViewModel : ViewModel() {
     private val _loadError = MutableLiveData<Boolean?>()
     val loadError: LiveData<Boolean?> = _loadError
 
-    //TODO comment this out
+
     /**
-     *
+     * Allows us to load all the information for the current user
+     * so that he can edit it.
      */
     fun loadUser() {
         viewModelScope.launch {
@@ -124,30 +125,31 @@ class SettingsViewModel : ViewModel() {
     }
 
 
-    //TODO comment this out
     /**
-     *
+     * Clears the updated resaults back to null after we have updated
+     * so that we dont get a retriger for update complete when we recreate
+     * the fragment
      */
     fun clearUpdateResult() { _updateResult.value = null }
 
 
-    //TODO comment this out
     /**
-     *
+     * clears the logout complete value back to null so that we don't
+     * geta retrigger of it if we create the fragment again
      */
     fun clearLogoutComplete() { _logoutComplete.value = null }
 
 
-    //TODO comment this out
     /**
-     *
+     * clears the delete resault back to null so that we dont get a
+     * retrigger of it when we recreate the fragment
      */
     fun clearDeleteResult() { _deleteResult.value = null }
 
 
-    //TODO comment this out
     /**
-     *
+     * clears the load erro value back to null so that we dont get a retrigger
+     * of it when we load the fragment again.
      */
     fun clearLoadError() { _loadError.value = null }
 }
