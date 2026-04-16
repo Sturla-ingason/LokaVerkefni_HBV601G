@@ -6,7 +6,6 @@ import android.view.ViewGroup
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.widget.Button
-import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import main.app.R
@@ -35,7 +34,6 @@ class FollowListAdapter(
      * @param view the view that is used inn the viewholder
      */
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val picture: ImageView = view.findViewById(R.id.followListItemPicture)
         val username: TextView = view.findViewById(R.id.followListItemUsername)
         val actionButton: Button = view.findViewById(R.id.followListItemActionButton)
     }
@@ -60,7 +58,6 @@ class FollowListAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val user = users[position]
         holder.username.text = user.username
-        holder.picture.setImageResource(android.R.drawable.ic_menu_gallery)
 
         if (isOwnProfile) {
             holder.actionButton.visibility = View.VISIBLE
